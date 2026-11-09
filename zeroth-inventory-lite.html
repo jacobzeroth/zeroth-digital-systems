@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zeroth Inventory Lite — Live Demo</title>
+<meta name="description" content="Zeroth Inventory Lite: product master, purchases, sales, live stock, low-stock alerts and monthly reports for small manufacturers. Fictional demo data.">
+<style>
+:root{
+  --bg:#070d17;--bg-2:#0b1220;--panel:#101b2d;--panel-2:#152238;--panel-3:#1a2a42;
+  --line:#21324b;--line-soft:#1a293f;--text:#e9eef7;--muted:#92a4bd;--muted-2:#6d809a;
+  --gold:#c9ab73;--gold-2:#a07d3f;--gold-soft:rgba(201,171,115,.12);
+  --green:#3ddc97;--green-soft:rgba(61,220,151,.12);--red:#ff7f7f;--red-soft:rgba(255,127,127,.12);
+  --amber:#f0b95a;--amber-soft:rgba(240,185,90,.13);--blue:#74a9ff;--blue-soft:rgba(116,169,255,.12);
+  --radius:14px;--radius-sm:9px;--shadow:0 26px 70px -34px rgba(0,0,0,.85);
+  --ui:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --display:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(900px 500px at 82% -8%,rgba(201,171,115,.07),transparent 60%),radial-gradient(700px 500px at -10% 20%,rgba(116,169,255,.06),transparent 55%),var(--bg);
+  color:var(--text);font:14px/1.55 var(--ui);-webkit-font-smoothing:antialiased;min-height:100vh;
+}
+body.modal-open{overflow:hidden}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+::selection{background:rgba(201,171,115,.3)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#243650;border-radius:20px;border:2px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- shell ---------- */
+.app{display:flex;min-height:100vh}
+.sidebar{width:256px;flex:0 0 256px;background:linear-gradient(180deg,#0a1322,#08101d);border-right:1px solid var(--line-soft);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:50}
+.brand{display:flex;align-items:center;gap:12px;padding:22px 20px 18px;border-bottom:1px solid var(--line-soft)}
+.brand-mark{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,#d8bf8c,#a07d3f);color:#0b1220;font-family:var(--display);font-size:22px;font-weight:700;box-shadow:0 8px 20px -10px rgba(201,171,115,.6)}
+.brand-name{font-family:var(--display);font-size:17px;font-weight:700;letter-spacing:.28em;line-height:1.1}
+.brand-sub{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-top:3px}
+.workspace{margin:14px 14px 6px;padding:12px 13px;border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:linear-gradient(160deg,rgba(201,171,115,.07),rgba(116,169,255,.03))}
+.ws-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);font-weight:700}
+.ws-name{font-size:13px;font-weight:600;margin-top:4px;line-height:1.3}
+.ws-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.nav{padding:10px 10px 16px;display:flex;flex-direction:column;gap:2px}
+.nav-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);font-weight:700;padding:10px 12px 6px}
+.nav-btn{display:flex;align-items:center;gap:11px;width:100%;padding:9px 12px;border:0;border-radius:8px;background:transparent;color:var(--muted);text-align:left;font-size:13px;transition:.15s}
+.nav-btn svg{width:17px;height:17px;flex:0 0 17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;color:var(--muted-2)}
+.nav-btn:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.nav-btn.active{background:linear-gradient(90deg,rgba(201,171,115,.15),rgba(201,171,115,.04));color:#f3e6ce;box-shadow:inset 2px 0 var(--gold)}
+.nav-btn.active svg{color:var(--gold)}
+.nav-count{margin-left:auto;font-size:10px;font-weight:700;background:var(--red-soft);color:var(--red);padding:1px 6px;border-radius:20px}
+.side-foot{margin-top:auto;padding:14px 16px 18px;border-top:1px solid var(--line-soft)}
+.help-card{width:100%;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:11px 12px;color:var(--text);display:flex;gap:10px;align-items:flex-start}
+.help-card:hover{border-color:var(--gold-2)}
+.help-card b{display:block;font-size:12px;margin-bottom:2px}
+.help-card span{font-size:10.5px;color:var(--muted);line-height:1.4}
+.help-card .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(61,220,151,.13);margin-top:5px;flex:0 0 7px}
+.side-note{font-size:10px;color:var(--muted-2);line-height:1.5;margin-top:12px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;padding:14px 28px;background:rgba(7,13,23,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+.topbar h1{font-size:17px;font-weight:650;margin:0;letter-spacing:.01em}
+.topbar p{margin:1px 0 0;font-size:11.5px;color:var(--muted)}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.demo-pill{font-size:9px;font-weight:800;letter-spacing:.14em;background:var(--gold-soft);color:var(--gold);border:1px solid rgba(201,171,115,.28);padding:4px 8px;border-radius:20px}
+.menu-btn{display:none!important}
+.view{padding:24px 28px 48px;max-width:1400px;width:100%;margin:0 auto}
+
+/* ---------- primitives ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:9px 14px;border-radius:8px;font-size:12.5px;font-weight:600;transition:.15s;white-space:nowrap}
+.btn:hover{background:var(--panel-3);border-color:#2c4160}
+.btn.primary{background:linear-gradient(145deg,#d8bf8c,#b08c4b);border-color:#c9ab73;color:#171006;font-weight:700;box-shadow:0 10px 24px -14px rgba(201,171,115,.8)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--red);border-color:rgba(255,127,127,.28);background:var(--red-soft)}
+.btn.sm{padding:6px 10px;font-size:11.5px;border-radius:7px}
+.btn.icon{padding:6px 8px;font-size:12px}
+.btn:focus-visible,.nav-btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.icon-btn{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;background:transparent;border:1px solid transparent;color:var(--muted)}
+.icon-btn:hover{background:var(--panel-2);color:var(--text);border-color:var(--line)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;border:1px solid transparent;white-space:nowrap}
+.badge.green{background:var(--green-soft);color:var(--green);border-color:rgba(61,220,151,.2)}
+.badge.amber{background:var(--amber-soft);color:var(--amber);border-color:rgba(240,185,90,.22)}
+.badge.red{background:var(--red-soft);color:var(--red);border-color:rgba(255,127,127,.22)}
+.badge.blue{background:var(--blue-soft);color:var(--blue);border-color:rgba(116,169,255,.22)}
+.badge.gold{background:var(--gold-soft);color:var(--gold);border-color:rgba(201,171,115,.25)}
+.badge.muted{background:rgba(255,255,255,.05);color:var(--muted);border-color:var(--line)}
+.panel{background:linear-gradient(165deg,rgba(21,34,56,.86),rgba(16,27,45,.92));border:1px solid var(--line-soft);border-radius:var(--radius);box-shadow:var(--shadow)}
+.panel-head{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line-soft)}
+.panel-head h2{font-size:13px;margin:0;font-weight:650;letter-spacing:.01em}
+.panel-head p{font-size:11px;color:var(--muted);margin:2px 0 0}
+.panel-head .right{margin-left:auto;display:flex;gap:7px;align-items:center}
+.panel-body{padding:18px}
+.grid{display:grid;gap:16px}
+.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.split{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr);gap:16px}
+.kpi{padding:17px 18px;position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;inset:auto -20px -40px auto;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(201,171,115,.09),transparent 70%)}
+.kpi .k-label{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted-2);font-weight:700}
+.kpi .k-value{font-size:25px;font-weight:700;letter-spacing:-.01em;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.kpi .k-foot{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.kpi .k-icon{position:absolute;right:15px;top:15px;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.04);border:1px solid var(--line-soft);color:var(--gold)}
+.kpi .k-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7}
+.up{color:var(--green)}.down{color:var(--red)}
+.money{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:11px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);font-weight:700;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:rgba(255,255,255,.022)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td .p-name{font-weight:600;color:var(--text);min-width:120px}
+td .p-code{font-size:10px;color:var(--muted-2);margin-top:1px}
+.empty{padding:34px 18px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--text);margin-bottom:4px}
+.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line-soft)}
+.toolbar .grow{flex:1}
+.input{background:#0b1524;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 11px;font-size:12.5px;min-width:0}
+.input::placeholder{color:var(--muted-2)}
+.input:focus{border-color:var(--gold-2);outline:none;box-shadow:0 0 0 3px rgba(201,171,115,.1)}
+select.input{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 15px) 50%,calc(100% - 10px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:30px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.field .input{width:100%}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.form-grid .span2{grid-column:span 2}
+.hint{font-size:11px;color:var(--muted-2);margin:0}
+.err{font-size:11.5px;color:var(--red);margin:8px 0 0;display:none}
+.err.show{display:block}
+@media(max-width:1050px){.cols-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1024px){
+  .sidebar{position:fixed;left:-270px;transition:.22s;box-shadow:0 0 60px rgba(0,0,0,.6)}
+  .sidebar.open{left:0}
+  .menu-btn{display:grid!important}
+}
+@media(max-width:860px){.split,.cols-2{grid-template-columns:1fr}}
+@media(max-width:720px){
+  .sidebar{position:fixed;left:-270px;transition:.22s;box-shadow:0 0 60px rgba(0,0,0,.6)}
+  .sidebar.open{left:0}
+  .menu-btn{display:grid!important}
+  .topbar{padding:12px 16px}
+  .topbar p{display:none}
+  .top-actions .hide-sm{display:none}
+  .view{padding:16px 14px 40px}
+  .cols-4,.cols-3,.cols-2{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .form-grid .span2{grid-column:auto}
+  .kpi .k-value{font-size:22px}
+}
+/* ---------- chart ---------- */
+.chart{width:100%;height:220px;display:flex;align-items:flex-end;gap:14px;padding:8px 4px 0}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end;min-width:0}
+.chart-bars{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:155px;width:100%}
+.chart-bar{width:42%;max-width:22px;border-radius:4px 4px 2px 2px;min-height:2px;transition:height .3s}
+.chart-bar.sales{background:linear-gradient(180deg,#d8bf8c,#a07d3f)}
+.chart-bar.purch{background:linear-gradient(180deg,#3b5f8f,#2b4568)}
+.chart-label{font-size:10px;color:var(--muted-2);white-space:nowrap}
+.legend{display:flex;gap:14px;font-size:10.5px;color:var(--muted);align-items:center}
+.legend i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:5px}
+.legend .s{background:linear-gradient(180deg,#d8bf8c,#a07d3f)}
+.legend .p{background:linear-gradient(180deg,#3b5f8f,#2b4568)}
+/* ---------- progress ---------- */
+.bar-row{display:grid;grid-template-columns:1fr auto;gap:5px 10px;padding:8px 0;border-bottom:1px solid var(--line-soft)}
+.bar-row:last-child{border-bottom:0}
+.bar-row .n{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-row .v{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar-track{grid-column:1/-1;height:5px;border-radius:20px;background:rgba(255,255,255,.05);overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#a07d3f,#d8bf8c)}
+.mini-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line-soft);font-size:11px;color:var(--muted)}
+.mini-foot b{font-size:13px;color:var(--green)}
+.mini-foot b.gold{color:var(--gold)}
+.list-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.list-row:last-child{border-bottom:0}
+.list-dot{width:28px;height:28px;flex:0 0 28px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:700}
+.list-dot.in{background:var(--blue-soft);color:var(--blue)}
+.list-dot.out{background:var(--green-soft);color:var(--green)}
+.list-main{min-width:0;flex:1}
+.list-main b{display:block;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-main span{font-size:10.5px;color:var(--muted)}
+.list-amt{font-size:12px;font-weight:650;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* ---------- modal / toast ---------- */
+#modalRoot{position:fixed;inset:0;z-index:100;display:none}
+#modalRoot.open{display:block}
+.modal-backdrop{position:absolute;inset:0;background:rgba(2,6,12,.72);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px 30px;overflow-y:auto}
+.modal{width:100%;max-width:540px;background:linear-gradient(170deg,#162338,#0f1a2b);border:1px solid #2a3d5a;border-radius:16px;box-shadow:0 40px 100px -20px #000;animation:pop .18s ease-out}
+.modal.wide{max-width:720px}
+@keyframes pop{from{transform:translateY(8px);opacity:.6}to{transform:none;opacity:1}}
+.modal-head{display:flex;align-items:center;gap:12px;padding:17px 19px;border-bottom:1px solid var(--line)}
+.modal-head h3{font-size:15px;margin:0;font-weight:650}
+.modal-body{padding:19px}
+.modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 19px;border-top:1px solid var(--line)}
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:#1b2b44;border:1px solid #31496c;color:var(--text);padding:10px 17px;border-radius:9px;font-size:12.5px;box-shadow:0 20px 50px -15px #000;opacity:0;pointer-events:none;transition:.2s;z-index:200;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+/* ---------- print ---------- */
+.print-head{display:none}
+@media print{
+  body{background:#fff;color:#111}
+  .sidebar,.topbar,#toast,.no-print{display:none!important}
+  .app{display:block}
+  .view{padding:0;max-width:none}
+  .panel{background:#fff;border:1px solid #ddd;box-shadow:none;border-radius:0}
+  .panel-head,td,th{border-color:#ddd}
+  th{color:#555}
+  .kpi .k-value,td .p-name,.kpi .k-label{color:#111}
+  .muted,.kpi .k-foot,.panel-head p{color:#555}
+  .badge{border:1px solid #bbb;color:#111!important;background:#fff!important}
+  .print-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:14px}
+  .print-head h1{font-size:20px;margin:0}
+  .print-head p{margin:2px 0 0;font-size:11px;color:#555}
+  a{text-decoration:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">Z</div>
+      <div><div class="brand-name">ZEROTH</div><div class="brand-sub">Digital Systems</div></div>
+    </div>
+    <div class="workspace">
+      <div class="ws-label">Live demo workspace</div>
+      <div class="ws-name">Sri Balaji Precision Works</div>
+      <div class="ws-meta">Coimbatore · Small manufacturer</div>
+    </div>
+    <nav class="nav" aria-label="Main">
+      <div class="nav-label">Operations</div>
+      <button class="nav-btn" data-view="overview" onclick="go('overview')"><span class="ico"></span>Overview</button>
+      <button class="nav-btn" data-view="products" onclick="go('products')"><span class="ico"></span>Products</button>
+      <button class="nav-btn" data-view="purchases" onclick="go('purchases')"><span class="ico"></span>Purchases</button>
+      <button class="nav-btn" data-view="sales" onclick="go('sales')"><span class="ico"></span>Sales</button>
+      <button class="nav-btn" data-view="stock" onclick="go('stock')"><span class="ico"></span>Stock <span class="nav-count" id="lowCount"></span></button>
+      <div class="nav-label">Insights</div>
+      <button class="nav-btn" data-view="reports" onclick="go('reports')"><span class="ico"></span>Monthly reports</button>
+    </nav>
+    <div class="side-foot">
+      <button class="help-card" onclick="demoGuide()">
+        <span class="dot"></span>
+        <span><b>Demo guide</b><span>4-step script for a 15-minute sales call.</span></span>
+      </button>
+      <div class="side-note">Fictional sample data.<br>No real customer information.<br><br>Built by <a href="index.html" style="color:var(--gold);text-decoration:underline;text-underline-offset:2px">Zeroth Digital Systems</a><br><a href="zeroth-factory-ops.html" style="color:var(--gold);text-decoration:underline;text-underline-offset:2px">Factory operations demo →</a></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" onclick="toggleSidebar()" aria-label="Open navigation">☰</button>
+      <div><h1 id="pageTitle">Overview</h1><p id="pageSub">Owner dashboard</p></div>
+      <div class="top-actions">
+        <span class="demo-pill hide-sm">DEMO</span>
+        <button class="btn ghost sm hide-sm" onclick="demoGuide()">Demo guide</button>
+        <button class="btn ghost sm hide-sm" onclick="resetDemo()">Reset data</button>
+        <button class="btn primary sm" onclick="openSale()">+ New sale</button>
+      </div>
+    </header>
+    <main class="view" id="view"></main>
+  </div>
+</div>
+<div id="modalRoot"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+/* ============================================================
+   Zeroth Inventory Lite — standalone demo
+   Fictional data for Sri Balaji Precision Works (Coimbatore).
+   Everything is stored locally in this browser.
+   ============================================================ */
+const KEY = "zeroth_inventory_lite_v1";
+const BRAND = {
+  company: "Sri Balaji Precision Works",
+  location: "Coimbatore, Tamil Nadu",
+  owner: "R. Balaji",
+  currency: "₹",
+  builtBy: "Zeroth Digital Systems"
+};
+
+function iso(d){ const m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0"); return d.getFullYear()+"-"+m+"-"+day; }
+function dateAgo(monthsAgo, day){
+  const now = new Date();
+  const d = new Date(now.getFullYear(), now.getMonth()-monthsAgo, 1);
+  const maxDay = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+  let dd = Math.min(day, maxDay);
+  if (monthsAgo === 0) dd = Math.min(dd, now.getDate());
+  d.setDate(Math.max(1, dd));
+  return iso(d);
+}
+function p(id,code,name,cat,unit,opening,reorder,cost,price){
+  return { id, code, name, cat, unit, opening, reorder, cost, price };
+}
+
+function seedDb(){
+  const products = [
+    p("p1","ZIL-0001","MS Base Plate 200×150","Raw Material","pcs",120,40,185,240),
+    p("p2","ZIL-0002","SS Flange 50 mm","Components","pcs",60,25,310,420),
+    p("p3","ZIL-0003","CNC Machined Bracket","Finished Goods","pcs",80,15,240,380),
+    p("p4","ZIL-0004","Aluminium Spacer 12 mm","Components","pcs",18,30,22,35),
+    p("p5","ZIL-0005","Powder-Coated Cover","Finished Goods","pcs",90,20,96,145),
+    p("p6","ZIL-0006","Hex Bolt M10×40","Consumables","pcs",500,200,4,7),
+    p("p7","ZIL-0007","Bearing Housing 6204","Components","pcs",24,60,275,390),
+    p("p8","ZIL-0008","Gear Shaft 20 mm","Finished Goods","pcs",12,30,640,890)
+  ];
+  const purchases = [
+    { id:"pu1", date:dateAgo(5,8), supplier:"Kumar Steel Traders", invoice:"KST-118", productId:"p1", qty:100, rate:185 },
+    { id:"pu2", date:dateAgo(5,9), supplier:"Chennai Metals", invoice:"CM-2401", productId:"p4", qty:100, rate:21 },
+    { id:"pu3", date:dateAgo(5,20), supplier:"Chennai Metals", invoice:"CM-2438", productId:"p2", qty:80, rate:305 },
+    { id:"pu4", date:dateAgo(4,5), supplier:"Sri Venkatesh Fasteners", invoice:"SVF-771", productId:"p6", qty:1000, rate:4 },
+    { id:"pu5", date:dateAgo(4,18), supplier:"Precision Tools", invoice:"PT-319", productId:"p7", qty:40, rate:270 },
+    { id:"pu6", date:dateAgo(3,2), supplier:"Kumar Steel Traders", invoice:"KST-164", productId:"p1", qty:100, rate:188 },
+    { id:"pu7", date:dateAgo(3,16), supplier:"Chennai Metals", invoice:"CM-2510", productId:"p2", qty:60, rate:312 },
+    { id:"pu8", date:dateAgo(2,4), supplier:"Coimbatore Castings", invoice:"CC-908", productId:"p8", qty:30, rate:630 },
+    { id:"pu9", date:dateAgo(2,22), supplier:"Kumar Steel Traders", invoice:"KST-201", productId:"p4", qty:150, rate:22 },
+    { id:"pu10", date:dateAgo(1,6), supplier:"Precision Tools", invoice:"PT-402", productId:"p7", qty:30, rate:278 },
+    { id:"pu11", date:dateAgo(1,20), supplier:"Sri Venkatesh Fasteners", invoice:"SVF-845", productId:"p6", qty:800, rate:4 },
+    { id:"pu12", date:dateAgo(0,3), supplier:"Kumar Steel Traders", invoice:"KST-233", productId:"p1", qty:80, rate:190 }
+  ];
+  const sales = [
+    { id:"sa1", date:dateAgo(5,12), customer:"Anand Pumps", invoice:"INV-101", productId:"p3", qty:18, rate:380 },
+    { id:"sa2", date:dateAgo(5,13), customer:"Anand Pumps", invoice:"INV-101", productId:"p5", qty:20, rate:145 },
+    { id:"sa3", date:dateAgo(5,26), customer:"Precision Auto Components", invoice:"INV-104", productId:"p2", qty:35, rate:420 },
+    { id:"sa4", date:dateAgo(5,27), customer:"Precision Auto Components", invoice:"INV-104", productId:"p7", qty:10, rate:390 },
+    { id:"sa5", date:dateAgo(4,9), customer:"Lakshmi Engineering", invoice:"INV-109", productId:"p1", qty:60, rate:240 },
+    { id:"sa6", date:dateAgo(4,10), customer:"Lakshmi Engineering", invoice:"INV-109", productId:"p6", qty:300, rate:7 },
+    { id:"sa7", date:dateAgo(4,21), customer:"Anand Pumps", invoice:"INV-113", productId:"p8", qty:8, rate:890 },
+    { id:"sa8", date:dateAgo(4,22), customer:"Anand Pumps", invoice:"INV-113", productId:"p4", qty:25, rate:35 },
+    { id:"sa9", date:dateAgo(3,6), customer:"Precision Auto Components", invoice:"INV-118", productId:"p3", qty:22, rate:380 },
+    { id:"sa10", date:dateAgo(3,19), customer:"Anand Pumps", invoice:"INV-121", productId:"p5", qty:30, rate:145 },
+    { id:"sa11", date:dateAgo(3,20), customer:"Anand Pumps", invoice:"INV-121", productId:"p7", qty:12, rate:390 },
+    { id:"sa12", date:dateAgo(2,3), customer:"Lakshmi Engineering", invoice:"INV-126", productId:"p1", qty:45, rate:240 },
+    { id:"sa13", date:dateAgo(2,15), customer:"Precision Auto Components", invoice:"INV-130", productId:"p2", qty:40, rate:420 },
+    { id:"sa14", date:dateAgo(2,28), customer:"Anand Pumps", invoice:"INV-134", productId:"p4", qty:40, rate:35 },
+    { id:"sa15", date:dateAgo(2,28), customer:"Anand Pumps", invoice:"INV-134", productId:"p6", qty:250, rate:7 },
+    { id:"sa16", date:dateAgo(1,8), customer:"Precision Auto Components", invoice:"INV-139", productId:"p8", qty:10, rate:890 },
+    { id:"sa17", date:dateAgo(1,17), customer:"Lakshmi Engineering", invoice:"INV-142", productId:"p3", qty:25, rate:380 },
+    { id:"sa18", date:dateAgo(1,17), customer:"Lakshmi Engineering", invoice:"INV-142", productId:"p5", qty:18, rate:145 },
+    { id:"sa19", date:dateAgo(1,29), customer:"Anand Pumps", invoice:"INV-146", productId:"p7", qty:15, rate:390 },
+    { id:"sa20", date:dateAgo(0,4), customer:"Precision Auto Components", invoice:"INV-151", productId:"p2", qty:30, rate:420 },
+    { id:"sa21", date:dateAgo(0,4), customer:"Precision Auto Components", invoice:"INV-151", productId:"p1", qty:35, rate:240 }
+  ];
+  return { version:1, profile:BRAND, products, purchases, sales };
+}
+
+let DB;
+try {
+  const raw = localStorage.getItem(KEY);
+  DB = raw ? JSON.parse(raw) : seedDb();
+} catch(e){ DB = seedDb(); }
+if(!DB || !Array.isArray(DB.products)) DB = seedDb();
+
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
+function uid(prefix){ return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function n(v){ const x=Number(v); return isFinite(x) ? x : 0; }
+function money(v){ return BRAND.currency + new Intl.NumberFormat("en-IN",{maximumFractionDigits:0}).format(n(v)); }
+function money2(v){ return BRAND.currency + new Intl.NumberFormat("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}).format(n(v)); }
+function qty(v){ return new Intl.NumberFormat("en-IN",{maximumFractionDigits:2}).format(n(v)); }
+function today(){ return iso(new Date()); }
+function monthKey(dateStr){ return String(dateStr).slice(0,7); }
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function monthLabel(key){
+  const parts = String(key).split("-");
+  const m = Number(parts[1])-1;
+  return (MONTHS[m]||"") + " " + parts[0];
+}
+function dateLabel(dateStr){
+  const d = new Date(String(dateStr)+"T00:00:00");
+  if(isNaN(d)) return dateStr;
+  return d.getDate()+" "+MONTHS[d.getMonth()];
+}
+function thisMonth(){ return monthKey(today()); }
+
+const productById = id => DB.products.find(x => x.id === id);
+function purchasedQty(id){ return DB.purchases.filter(x => x.productId===id).reduce((s,x)=>s+n(x.qty),0); }
+function soldQty(id){ return DB.sales.filter(x => x.productId===id).reduce((s,x)=>s+n(x.qty),0); }
+function stockOf(p){ return n(p.opening) + purchasedQty(p.id) - soldQty(p.id); }
+function stockStatus(p){
+  const s = stockOf(p);
+  if(s <= 0) return "out";
+  if(s <= n(p.reorder)) return "low";
+  return "ok";
+}
+function lowStock(){ return DB.products.filter(p => stockOf(p) <= n(p.reorder)); }
+function nextProductCode(){
+  let max = 0;
+  DB.products.forEach(p => { const m = String(p.code).match(/(\d+)$/); if(m) max = Math.max(max, Number(m[1])); });
+  return "ZIL-" + String(max+1).padStart(4,"0");
+}
+function monthOptions(){
+  const set = new Set([thisMonth()]);
+  DB.sales.forEach(x => set.add(monthKey(x.date)));
+  DB.purchases.forEach(x => set.add(monthKey(x.date)));
+  return Array.from(set).sort().reverse();
+}
+function lastMonths(count){
+  const out = [];
+  const now = new Date();
+  for(let i=count-1;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    out.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));
+  }
+  return out;
+}
+function salesIn(month){ const rows = DB.sales.filter(x => monthKey(x.date)===month); return { rows, revenue: rows.reduce((s,x)=>s+n(x.qty)*n(x.rate),0), units: rows.reduce((s,x)=>s+n(x.qty),0) }; }
+function purchasesIn(month){ const rows = DB.purchases.filter(x => monthKey(x.date)===month); return { rows, spend: rows.reduce((s,x)=>s+n(x.qty)*n(x.rate),0), units: rows.reduce((s,x)=>s+n(x.qty),0) }; }
+function cogsIn(month){
+  return DB.sales.filter(x => monthKey(x.date)===month).reduce((s,x)=>{ const p=productById(x.productId); return s + n(x.qty)*(p?n(p.cost):0); },0);
+}
+function stockValue(){ return DB.products.reduce((s,p)=>s + Math.max(0,stockOf(p))*n(p.cost),0); }
+
+const ICONS = {
+  overview:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  products:'<svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
+  purchases:'<svg viewBox="0 0 24 24"><path d="M6 2h12l1 5H5l1-5z"/><path d="M5 7v13h14V7"/><path d="M9 12h6"/></svg>',
+  sales:'<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>',
+  stock:'<svg viewBox="0 0 24 24"><path d="M3 7h18v14H3z"/><path d="M3 7l3-4h12l3 4"/><path d="M9 12h6"/></svg>',
+  reports:'<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>'
+};
+const VIEW_META = {
+  overview:["Overview","Owner dashboard · this month at a glance"],
+  products:["Products","Master list, pricing and reorder levels"],
+  purchases:["Purchases","Stock received from suppliers"],
+  sales:["Sales","Invoices raised to customers"],
+  stock:["Stock","Opening + purchased − sold, updated live"],
+  reports:["Monthly reports","Sales, costs and profit by month"]
+};
+
+const state = { view:"overview", productSearch:"", stockFilter:"all" };
+
+function render(){
+  const meta = VIEW_META[state.view] || VIEW_META.overview;
+  document.getElementById("pageTitle").textContent = meta[0];
+  document.getElementById("pageSub").textContent = meta[1];
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === state.view));
+  const low = lowStock().length;
+  const c = document.getElementById("lowCount");
+  c.textContent = low ? String(low) : "";
+  c.style.display = low ? "" : "none";
+  const views = { overview:renderOverview, products:renderProducts, purchases:renderPurchases, sales:renderSales, stock:renderStock, reports:renderReports };
+  document.getElementById("view").innerHTML = (views[state.view] || renderOverview)();
+}
+function go(view){
+  state.view = view;
+  if(location.hash !== "#"+view) history.replaceState(null,"","#"+view);
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+  document.getElementById("sidebar").classList.remove("open");
+}
+function toggleSidebar(){ document.getElementById("sidebar").classList.toggle("open"); }
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+
+/* ---------- overview ---------- */
+function pctChange(current, previous){
+  if(!previous) return current ? "New this month" : "No activity yet";
+  const d = ((current-previous)/previous)*100;
+  return (d>=0?"▲ ":"▼ ") + Math.abs(d).toFixed(1) + "% vs last month";
+}
+function renderOverview(){
+  const month = thisMonth();
+  const prevDate = new Date(); prevDate.setMonth(prevDate.getMonth()-1);
+  const prev = prevDate.getFullYear()+"-"+String(prevDate.getMonth()+1).padStart(2,"0");
+  const cur = salesIn(month), last = salesIn(prev), buys = purchasesIn(month);
+  const low = lowStock().sort((a,b)=> (stockOf(a)/Math.max(1,n(a.reorder))) - (stockOf(b)/Math.max(1,n(b.reorder))));
+  const months = lastMonths(6);
+  const series = months.map(m => ({ m, s:salesIn(m).revenue, p:purchasesIn(m).spend }));
+  const max = Math.max(1, ...series.map(x=>Math.max(x.s,x.p)));
+  const chart = series.map(x => `
+    <div class="chart-col">
+      <div class="chart-bars" title="${monthLabel(x.m)} · sales ${money(x.s)} · purchases ${money(x.p)}">
+        <div class="chart-bar sales" style="height:${Math.max(2,(x.s/max)*100)}%"></div>
+        <div class="chart-bar purch" style="height:${Math.max(2,(x.p/max)*100)}%"></div>
+      </div>
+      <div class="chart-label">${monthLabel(x.m).split(" ")[0]}</div>
+    </div>`).join("");
+
+  const topMap = {};
+  DB.sales.filter(x => monthKey(x.date)===month).forEach(x => {
+    const p = productById(x.productId); const name = p ? p.name : "Deleted product";
+    topMap[name] = (topMap[name]||0) + n(x.qty)*n(x.rate);
+  });
+  let top = Object.entries(topMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if(!top.length){
+    const all = {};
+    DB.sales.forEach(x => { const p=productById(x.productId); const name=p?p.name:"Deleted product"; all[name]=(all[name]||0)+n(x.qty)*n(x.rate); });
+    top = Object.entries(all).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  }
+  const topMax = Math.max(1, ...top.map(t=>t[1]));
+  const topHtml = top.length ? top.map(([name,val]) => `
+    <div class="bar-row"><div class="n">${esc(name)}</div><div class="v">${money(val)}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.max(3,(val/topMax)*100)}%"></div></div></div>`).join("")
+    : `<div class="empty"><b>No sales yet</b>Record your first sale to see product performance.</div>`;
+
+  const activity = DB.sales.map(x=>({...x,type:"sale"})).concat(DB.purchases.map(x=>({...x,type:"purchase"})))
+    .sort((a,b)=> String(b.date).localeCompare(String(a.date))).slice(0,7);
+  const activityHtml = activity.length ? activity.map(x => {
+    const p = productById(x.productId);
+    const isSale = x.type === "sale";
+    return `<div class="list-row">
+      <div class="list-dot ${isSale?"out":"in"}">${isSale?"↑":"↓"}</div>
+      <div class="list-main"><b>${esc(p?p.name:"Deleted product")} <span class="muted">× ${qty(x.qty)}</span></b>
+      <span>${isSale ? esc(x.customer) : esc(x.supplier)} · ${dateLabel(x.date)}</span></div>
+      <div class="list-amt ${isSale?"up":""}">${isSale?"+":"−"}${money(n(x.qty)*n(x.rate))}</div>
+    </div>`;
+  }).join("") : `<div class="empty"><b>No transactions yet</b>Add a purchase or a sale to get started.</div>`;
+
+  const lowHtml = low.length ? low.slice(0,6).map(p => {
+    const s = stockOf(p);
+    return `<div class="list-row">
+      <div class="list-dot out" style="background:${s<=0?"var(--red-soft)":"var(--amber-soft)"};color:${s<=0?"var(--red)":"var(--amber)"}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div>
+      <div class="list-main"><b>${esc(p.name)}</b><span>${qty(s)} ${esc(p.unit)} left · reorder at ${qty(p.reorder)}</span></div>
+      <button class="btn sm" onclick="openPurchase('${p.id}')">Restock</button>
+    </div>`;
+  }).join("") : `<div class="empty"><b>All stock levels are healthy</b>No item is at or below its reorder level.</div>`;
+
+  return `
+  <div class="grid cols-4" style="margin-bottom:16px">
+    <div class="panel kpi"><div class="k-label">Stock value (at cost)</div><div class="k-value">${money(stockValue())}</div><div class="k-foot">${DB.products.length} products · ${DB.products.reduce((s,p)=>s+Math.max(0,stockOf(p)),0).toLocaleString("en-IN")} units on hand</div><div class="k-icon">${ICONS.stock}</div></div>
+    <div class="panel kpi"><div class="k-label">Sales this month</div><div class="k-value">${money(cur.revenue)}</div><div class="k-foot ${cur.revenue>=last.revenue?"up":"down"}">${pctChange(cur.revenue,last.revenue)}</div><div class="k-icon">${ICONS.sales}</div></div>
+    <div class="panel kpi"><div class="k-label">Purchases this month</div><div class="k-value">${money(buys.spend)}</div><div class="k-foot">${buys.rows.length} ${buys.rows.length===1?"entry":"entries"} · ${qty(buys.units)} units received</div><div class="k-icon">${ICONS.purchases}</div></div>
+    <div class="panel kpi"><div class="k-label">Low-stock items</div><div class="k-value" style="color:${low.length?"var(--amber)":"var(--green)"}">${low.length}</div><div class="k-foot">${low.length?`<span class="badge amber">Needs attention</span>`:`<span class="badge green">All clear</span>`}</div><div class="k-icon">${ICONS.products}</div></div>
+  </div>
+
+  <div class="split" style="margin-bottom:16px">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Sales vs purchases</h2><p>Last 6 months · ${monthLabel(months[0])} to ${monthLabel(months[5])}</p></div><div class="right"><div class="legend"><span><i class="s"></i>Sales</span><span><i class="p"></i>Purchases</span></div></div></div>
+      <div class="panel-body"><div class="chart">${chart}</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Top products</h2><p>By revenue${top.length?" · "+monthLabel(month):""}</p></div><div class="right"><span class="badge gold">This month</span></div></div>
+      <div class="panel-body" style="padding-top:6px;padding-bottom:12px">${topHtml}<div class="mini-foot"><span>Gross profit this month</span><b>${money(cur.revenue-cogsIn(month))}</b></div></div>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Low-stock alerts</h2><p>At or below the reorder level</p></div><div class="right"><span class="badge ${low.length?"amber":"green"}">${low.length?low.length+" items":"Healthy"}</span></div></div>
+      <div class="panel-body" style="padding-top:4px;padding-bottom:12px">${lowHtml}<div class="mini-foot"><span>Stock value at cost</span><b class="gold">${money(stockValue())}</b></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Recent activity</h2><p>Latest purchases and sales</p></div><div class="right"><button class="btn ghost sm" onclick="go('reports')">Reports</button></div></div>
+      <div class="panel-body" style="padding-top:4px;padding-bottom:4px">${activityHtml}</div>
+    </div>
+  </div>`;
+}
+/* ---------- products ---------- */
+function stockBadge(p){
+  const s = stockOf(p), st = stockStatus(p);
+  if(st==="out") return `<span class="badge red">Out of stock</span>`;
+  if(st==="low") return `<span class="badge amber">Low · ${qty(s)}</span>`;
+  return `<span class="badge green">${qty(s)} ${esc(p.unit)}</span>`;
+}
+function filteredProducts(){
+  const q = state.productSearch.trim().toLowerCase();
+  return DB.products.filter(p => !q || (p.name+" "+p.code+" "+p.cat).toLowerCase().includes(q));
+}
+function renderProducts(){
+  return `
+  <div class="panel" style="margin-bottom:16px">
+    <div class="toolbar">
+      <div class="grow"><input class="input" id="productSearch" style="width:min(340px,100%)" placeholder="Search by name, code or category…" value="${esc(state.productSearch)}" oninput="productSearch(this.value)" aria-label="Search products"></div>
+      <span class="muted small" id="productCount">${filteredProducts().length} of ${DB.products.length} products</span>
+      <button class="btn primary sm" onclick="openProduct()">+ Add product</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Product</th><th>Category</th><th class="num">Cost</th><th class="num">Selling</th><th>Stock</th><th style="text-align:right">Actions</th></tr></thead>
+        <tbody id="productRows">${productRows()}</tbody>
+      </table>
+    </div>
+  </div>
+  <div class="grid cols-3">
+    <div class="panel"><div class="panel-body"><div class="k-label" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2);font-weight:700">Active products</div><div style="font-size:22px;font-weight:700;margin-top:4px">${DB.products.length}</div><div class="muted small">${new Set(DB.products.map(p=>p.cat)).size} categories</div></div></div>
+    <div class="panel"><div class="panel-body"><div class="k-label" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2);font-weight:700">Units on hand</div><div style="font-size:22px;font-weight:700;margin-top:4px">${DB.products.reduce((s,p)=>s+Math.max(0,stockOf(p)),0).toLocaleString("en-IN")}</div><div class="muted small">Across all products</div></div></div>
+    <div class="panel"><div class="panel-body"><div class="k-label" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2);font-weight:700">Low stock</div><div style="font-size:22px;font-weight:700;margin-top:4px;color:${lowStock().length?"var(--amber)":"var(--green)"}">${lowStock().length}</div><div class="muted small">At or below reorder level</div></div></div>
+  </div>`;
+}
+function productRows(){
+  const rows = filteredProducts();
+  if(!rows.length) return `<tr><td colspan="6"><div class="empty"><b>No products match</b>Try a different search or add a product.</div></td></tr>`;
+  return rows.map(p => `<tr>
+    <td><div class="p-name">${esc(p.name)}</div><div class="p-code">${esc(p.code)}</div></td>
+    <td><span class="badge muted">${esc(p.cat)}</span></td>
+    <td class="num">${money2(p.cost)}</td>
+    <td class="num">${money2(p.price)}</td>
+    <td>${stockBadge(p)}<div class="p-code">reorder ${qty(p.reorder)}</div></td>
+    <td style="text-align:right;white-space:nowrap">
+      <button class="btn ghost sm" onclick="openLedger('${p.id}')">Ledger</button>
+      <button class="btn ghost sm" onclick="openProduct('${p.id}')">Edit</button>
+      <button class="btn ghost sm" style="color:var(--red)" onclick="deleteProduct('${p.id}')" aria-label="Delete ${esc(p.name)}">✕</button>
+    </td>
+  </tr>`).join("");
+}
+function productSearch(v){
+  state.productSearch = v;
+  const rows = filteredProducts();
+  document.getElementById("productRows").innerHTML = productRows();
+  document.getElementById("productCount").textContent = rows.length + " of " + DB.products.length + " products";
+}
+
+function openProduct(id){
+  const p = id ? productById(id) : null;
+  const cats = Array.from(new Set(DB.products.map(x=>x.cat)));
+  const units = Array.from(new Set(["pcs","kg","g","ltr","ml","box","set","m", ...DB.products.map(x=>x.unit)]));
+  openModal(p ? "Edit product" : "Add product", `
+    <div class="form-grid">
+      <div class="field span2"><label for="pf-name">Product name</label><input class="input" id="pf-name" value="${p?esc(p.name):""}" placeholder="e.g. MS Base Plate 200×150"></div>
+      <div class="field"><label for="pf-cat">Category</label><input class="input" id="pf-cat" list="catList" value="${p?esc(p.cat):""}" placeholder="e.g. Raw Material"><datalist id="catList">${cats.map(c=>`<option value="${esc(c)}">`).join("")}</datalist></div>
+      <div class="field"><label for="pf-unit">Unit</label><select class="input" id="pf-unit">${units.map(u=>`<option ${p&&p.unit===u?"selected":""}>${esc(u)}</option>`).join("")}</select></div>
+      <div class="field"><label for="pf-opening">Opening stock</label><input class="input" id="pf-opening" type="number" min="0" step="1" value="${p?n(p.opening):0}"></div>
+      <div class="field"><label for="pf-reorder">Reorder level</label><input class="input" id="pf-reorder" type="number" min="0" step="1" value="${p?n(p.reorder):0}"></div>
+      <div class="field"><label for="pf-cost">Cost price (${BRAND.currency})</label><input class="input" id="pf-cost" type="number" min="0" step="0.01" value="${p?n(p.cost):0}"></div>
+      <div class="field"><label for="pf-price">Selling price (${BRAND.currency})</label><input class="input" id="pf-price" type="number" min="0" step="0.01" value="${p?n(p.price):0}"></div>
+    </div>
+    <p class="hint" style="margin-top:12px">Stock is calculated as opening stock + purchases − sales. Editing opening stock changes the running balance.</p>
+    <p class="err" id="modalErr"></p>`,
+    `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveProduct('${p?p.id:""}')">${p?"Save changes":"Add product"}</button>`);
+}
+function saveProduct(id){
+  const name = document.getElementById("pf-name").value.trim();
+  const cat = document.getElementById("pf-cat").value.trim() || "Uncategorised";
+  const unit = document.getElementById("pf-unit").value;
+  const opening = n(document.getElementById("pf-opening").value);
+  const reorder = n(document.getElementById("pf-reorder").value);
+  const cost = n(document.getElementById("pf-cost").value);
+  const price = n(document.getElementById("pf-price").value);
+  const err = document.getElementById("modalErr");
+  if(!name){ err.textContent="Enter a product name."; err.classList.add("show"); return; }
+  if(opening<0 || reorder<0 || cost<0 || price<0){ err.textContent="Numbers cannot be negative."; err.classList.add("show"); return; }
+  if(price < cost){ err.textContent="Selling price is below cost price. Check the numbers before saving."; err.classList.add("show"); return; }
+  if(id){
+    const p = productById(id);
+    Object.assign(p,{name,cat,unit,opening,reorder,cost,price});
+    toast("Product updated");
+  } else {
+    DB.products.push({ id:uid("p"), code:nextProductCode(), name, cat, unit, opening, reorder, cost, price });
+    toast("Product added · code generated");
+  }
+  save(); closeModal(); render();
+}
+function deleteProduct(id){
+  const p = productById(id); if(!p) return;
+  const tx = DB.purchases.filter(x=>x.productId===id).length + DB.sales.filter(x=>x.productId===id).length;
+  if(!confirm(`Delete ${p.name}?${tx?` This also removes ${tx} linked purchase/sale entries.`:""}`)) return;
+  DB.products = DB.products.filter(x=>x.id!==id);
+  DB.purchases = DB.purchases.filter(x=>x.productId!==id);
+  DB.sales = DB.sales.filter(x=>x.productId!==id);
+  save(); render(); toast("Product deleted");
+}
+
+function openLedger(id){
+  const p = productById(id); if(!p) return;
+  const moves = [];
+  DB.purchases.filter(x=>x.productId===id).forEach(x=>moves.push({...x,kind:"purchase"}));
+  DB.sales.filter(x=>x.productId===id).forEach(x=>moves.push({...x,kind:"sale"}));
+  moves.sort((a,b)=> String(a.date).localeCompare(String(b.date)) || String(a.id).localeCompare(String(b.id)));
+  let bal = n(p.opening);
+  const rows = [`<tr><td class="muted">Starting</td><td><span class="badge muted">Opening</span></td><td class="muted">—</td><td class="num">${qty(p.opening)}</td><td class="num">${qty(bal)}</td></tr>`]
+    .concat(moves.map(x=>{
+      const isSale = x.kind==="sale";
+      bal += isSale ? -n(x.qty) : n(x.qty);
+      return `<tr><td>${dateLabel(x.date)}</td><td><span class="badge ${isSale?"green":"blue"}">${isSale?"Sale":"Purchase"}</span></td><td>${esc(isSale?x.customer:x.supplier)}</td><td class="num" style="color:${isSale?"var(--red)":"var(--green)"}">${isSale?"−":"+"}${qty(x.qty)}</td><td class="num">${qty(bal)}</td></tr>`;
+    }));
+  openModal("Stock ledger · "+p.name, `
+    <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+      <div><div class="muted small">On hand</div><div style="font-size:20px;font-weight:700">${qty(stockOf(p))} ${esc(p.unit)}</div></div>
+      <div><div class="muted small">Purchased</div><div style="font-size:20px;font-weight:700">${qty(purchasedQty(p.id))}</div></div>
+      <div><div class="muted small">Sold</div><div style="font-size:20px;font-weight:700">${qty(soldQty(p.id))}</div></div>
+      <div><div class="muted small">Stock value</div><div style="font-size:20px;font-weight:700">${money(Math.max(0,stockOf(p))*n(p.cost))}</div></div>
+    </div>
+    <div class="table-wrap" style="border:1px solid var(--line-soft);border-radius:9px">
+      <table><thead><tr><th>Date</th><th>Type</th><th>Party</th><th class="num">Qty</th><th class="num">Balance</th></tr></thead><tbody>${rows.join("")}</tbody></table>
+    </div>`,
+    `<button class="btn" onclick="closeModal()">Close</button>`);
+}
+/* ---------- purchases ---------- */
+function renderPurchases(){
+  const month = thisMonth(), cur = purchasesIn(month);
+  const rows = DB.purchases.slice().sort((a,b)=> String(b.date).localeCompare(String(a.date)));
+  const body = rows.length ? rows.map(x => {
+    const p = productById(x.productId);
+    return `<tr>
+      <td style="white-space:nowrap">${dateLabel(x.date)}</td>
+      <td>${esc(x.supplier)}<div class="p-code">${esc(x.invoice||"")}</div></td>
+      <td>${p?`<div class="p-name">${esc(p.name)}</div><div class="p-code">${esc(p.code)}</div>`:"<span class='muted'>Deleted product</span>"}</td>
+      <td class="num">${qty(x.qty)}</td>
+      <td class="num">${money2(x.rate)}</td>
+      <td class="num"><b>${money(n(x.qty)*n(x.rate))}</b></td>
+      <td style="text-align:right"><button class="btn ghost sm" style="color:var(--red)" onclick="deletePurchase('${x.id}')" aria-label="Delete purchase">✕</button></td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="7"><div class="empty"><b>No purchases recorded</b>Add stock received from a supplier.</div></td></tr>`;
+  return `
+  <div class="grid cols-3" style="margin-bottom:16px">
+    <div class="panel kpi"><div class="k-label">Purchases this month</div><div class="k-value">${money(cur.spend)}</div><div class="k-foot">${cur.rows.length} ${cur.rows.length===1?"entry":"entries"} · ${qty(cur.units)} units</div></div>
+    <div class="panel kpi"><div class="k-label">All-time purchase value</div><div class="k-value">${money(DB.purchases.reduce((s,x)=>s+n(x.qty)*n(x.rate),0))}</div><div class="k-foot">${DB.purchases.length} ${DB.purchases.length===1?"entry":"entries"} recorded</div></div>
+    <div class="panel kpi"><div class="k-label">Suppliers</div><div class="k-value">${new Set(DB.purchases.map(x=>x.supplier)).size}</div><div class="k-foot">Active in this demo</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><div><h2>Purchase register</h2><p>Stock received from suppliers</p></div><div class="right"><button class="btn primary sm" onclick="openPurchase()">+ Record purchase</button></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Supplier / invoice</th><th>Product</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
+  </div>`;
+}
+function openPurchase(productId){
+  const options = DB.products.map(p=>`<option value="${p.id}" ${productId===p.id?"selected":""}>${esc(p.name)} · ${esc(p.code)}</option>`).join("");
+  const sel = productId ? productById(productId) : DB.products[0];
+  openModal("Record purchase", `
+    <div class="form-grid">
+      <div class="field"><label for="puf-date">Date</label><input class="input" id="puf-date" type="date" value="${today()}" max="${today()}"></div>
+      <div class="field"><label for="puf-product">Product</label><select class="input" id="puf-product" onchange="purchaseRate()">${options}</select></div>
+      <div class="field"><label for="puf-supplier">Supplier</label><input class="input" id="puf-supplier" placeholder="e.g. Kumar Steel Traders"></div>
+      <div class="field"><label for="puf-invoice">Invoice / DC number</label><input class="input" id="puf-invoice" placeholder="e.g. KST-241"></div>
+      <div class="field"><label for="puf-qty">Quantity</label><input class="input" id="puf-qty" type="number" min="0.01" step="1" value="1"></div>
+      <div class="field"><label for="puf-rate">Rate (${BRAND.currency} per unit)</label><input class="input" id="puf-rate" type="number" min="0" step="0.01" value="${sel?n(sel.cost):0}"></div>
+    </div>
+    <p class="hint" style="margin-top:12px">Current stock for this item: <b id="puf-stock">${sel?qty(stockOf(sel))+" "+esc(sel.unit):"—"}</b>. Recording a purchase increases stock immediately.</p>
+    <p class="err" id="modalErr"></p>`,
+    `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="savePurchase()">Record purchase</button>`);
+}
+function purchaseRate(){
+  const p = productById(document.getElementById("puf-product").value);
+  if(!p) return;
+  document.getElementById("puf-rate").value = n(p.cost);
+  document.getElementById("puf-stock").textContent = qty(stockOf(p)) + " " + p.unit;
+}
+function savePurchase(){
+  const date = document.getElementById("puf-date").value || today();
+  const productId = document.getElementById("puf-product").value;
+  const supplier = document.getElementById("puf-supplier").value.trim() || "Unnamed supplier";
+  const invoice = document.getElementById("puf-invoice").value.trim();
+  const q = n(document.getElementById("puf-qty").value);
+  const rate = n(document.getElementById("puf-rate").value);
+  const err = document.getElementById("modalErr");
+  if(!productId){ err.textContent="Choose a product."; err.classList.add("show"); return; }
+  if(q<=0){ err.textContent="Quantity must be greater than zero."; err.classList.add("show"); return; }
+  if(rate<0){ err.textContent="Rate cannot be negative."; err.classList.add("show"); return; }
+  DB.purchases.push({ id:uid("pu"), date, supplier, invoice, productId, qty:q, rate });
+  save(); closeModal(); render(); toast("Purchase recorded · stock updated");
+}
+function deletePurchase(id){
+  if(!confirm("Delete this purchase? Stock will be reduced by its quantity.")) return;
+  DB.purchases = DB.purchases.filter(x=>x.id!==id); save(); render(); toast("Purchase deleted");
+}
+
+/* ---------- sales ---------- */
+function renderSales(){
+  const month = thisMonth(), cur = salesIn(month);
+  const rows = DB.sales.slice().sort((a,b)=> String(b.date).localeCompare(String(a.date)));
+  const body = rows.length ? rows.map(x => {
+    const p = productById(x.productId);
+    return `<tr>
+      <td style="white-space:nowrap">${dateLabel(x.date)}</td>
+      <td>${esc(x.customer)}<div class="p-code">${esc(x.invoice||"")}</div></td>
+      <td>${p?`<div class="p-name">${esc(p.name)}</div><div class="p-code">${esc(p.code)}</div>`:"<span class='muted'>Deleted product</span>"}</td>
+      <td class="num">${qty(x.qty)}</td>
+      <td class="num">${money2(x.rate)}</td>
+      <td class="num"><b>${money(n(x.qty)*n(x.rate))}</b></td>
+      <td style="text-align:right"><button class="btn ghost sm" style="color:var(--red)" onclick="deleteSale('${x.id}')" aria-label="Delete sale">✕</button></td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="7"><div class="empty"><b>No sales recorded</b>Raise an invoice to a customer.</div></td></tr>`;
+  return `
+  <div class="grid cols-3" style="margin-bottom:16px">
+    <div class="panel kpi"><div class="k-label">Sales this month</div><div class="k-value">${money(cur.revenue)}</div><div class="k-foot">${qty(cur.units)} units sold</div></div>
+    <div class="panel kpi"><div class="k-label">Gross profit this month</div><div class="k-value" style="color:var(--green)">${money(cur.revenue - cogsIn(month))}</div><div class="k-foot">Revenue minus product cost</div></div>
+    <div class="panel kpi"><div class="k-label">Customers</div><div class="k-value">${new Set(DB.sales.map(x=>x.customer)).size}</div><div class="k-foot">${DB.sales.length} ${DB.sales.length===1?"invoice":"invoices"} in demo</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><div><h2>Sales register</h2><p>Invoices raised to customers</p></div><div class="right"><button class="btn primary sm" onclick="openSale()">+ Record sale</button></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Customer / invoice</th><th>Product</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
+  </div>`;
+}
+function openSale(productId){
+  const options = DB.products.map(p=>`<option value="${p.id}" ${productId===p.id?"selected":""}>${esc(p.name)} · ${esc(p.code)}</option>`).join("");
+  const sel = productId ? productById(productId) : DB.products[0];
+  openModal("Record sale", `
+    <div class="form-grid">
+      <div class="field"><label for="saf-date">Date</label><input class="input" id="saf-date" type="date" value="${today()}" max="${today()}"></div>
+      <div class="field"><label for="saf-product">Product</label><select class="input" id="saf-product" onchange="saleRate()">${options}</select></div>
+      <div class="field"><label for="saf-customer">Customer</label><input class="input" id="saf-customer" placeholder="e.g. Anand Pumps"></div>
+      <div class="field"><label for="saf-invoice">Invoice number</label><input class="input" id="saf-invoice" placeholder="e.g. INV-152"></div>
+      <div class="field"><label for="saf-qty">Quantity</label><input class="input" id="saf-qty" type="number" min="0.01" step="1" value="1"></div>
+      <div class="field"><label for="saf-rate">Rate (${BRAND.currency} per unit)</label><input class="input" id="saf-rate" type="number" min="0" step="0.01" value="${sel?n(sel.price):0}"></div>
+    </div>
+    <p class="hint" style="margin-top:12px">Available stock: <b id="saf-stock">${sel?qty(stockOf(sel))+" "+esc(sel.unit):"—"}</b>. A sale reduces stock immediately.</p>
+    <p class="err" id="modalErr"></p>`,
+    `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveSale()">Record sale</button>`);
+}
+function saleRate(){
+  const p = productById(document.getElementById("saf-product").value);
+  if(!p) return;
+  document.getElementById("saf-rate").value = n(p.price);
+  document.getElementById("saf-stock").textContent = qty(stockOf(p)) + " " + p.unit;
+}
+function saveSale(){
+  const date = document.getElementById("saf-date").value || today();
+  const productId = document.getElementById("saf-product").value;
+  const customer = document.getElementById("saf-customer").value.trim() || "Walk-in customer";
+  const invoice = document.getElementById("saf-invoice").value.trim();
+  const q = n(document.getElementById("saf-qty").value);
+  const rate = n(document.getElementById("saf-rate").value);
+  const err = document.getElementById("modalErr");
+  const p = productById(productId);
+  if(!p){ err.textContent="Choose a product."; err.classList.add("show"); return; }
+  if(q<=0){ err.textContent="Quantity must be greater than zero."; err.classList.add("show"); return; }
+  if(rate<0){ err.textContent="Rate cannot be negative."; err.classList.add("show"); return; }
+  if(q > stockOf(p)){ err.textContent="Only " + qty(stockOf(p)) + " " + p.unit + " available. Record a purchase first or reduce the quantity."; err.classList.add("show"); return; }
+  DB.sales.push({ id:uid("sa"), date, customer, invoice, productId, qty:q, rate });
+  save(); closeModal(); render(); toast("Sale recorded · stock updated");
+}
+function deleteSale(id){
+  if(!confirm("Delete this sale? Stock will be added back.")) return;
+  DB.sales = DB.sales.filter(x=>x.id!==id); save(); render(); toast("Sale deleted");
+}
+
+/* ---------- stock ---------- */
+function renderStock(){
+  let rows = DB.products.slice();
+  if(state.stockFilter==="low") rows = rows.filter(p=>stockStatus(p)==="low");
+  if(state.stockFilter==="out") rows = rows.filter(p=>stockStatus(p)==="out");
+  rows.sort((a,b)=> (stockOf(a)/Math.max(1,n(a.reorder))) - (stockOf(b)/Math.max(1,n(b.reorder))));
+  const body = rows.length ? rows.map(p=>{
+    const s = stockOf(p), st = stockStatus(p);
+    return `<tr>
+      <td><div class="p-name">${esc(p.name)}</div><div class="p-code">${esc(p.code)}</div></td>
+      <td class="num">${qty(p.opening)}</td>
+      <td class="num" style="color:var(--blue)">+${qty(purchasedQty(p.id))}</td>
+      <td class="num" style="color:var(--green)">−${qty(soldQty(p.id))}</td>
+      <td class="num"><b style="color:${st==="ok"?"var(--text)":st==="low"?"var(--amber)":"var(--red)"}">${qty(s)}</b> <span class="muted small">${esc(p.unit)}</span></td>
+      <td class="num muted">${qty(p.reorder)}</td>
+      <td class="num">${money(Math.max(0,s)*n(p.cost))}</td>
+      <td>${stockBadge(p)}</td>
+      <td style="text-align:right"><button class="btn ghost sm" onclick="openLedger('${p.id}')">Ledger</button></td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="9"><div class="empty"><b>Nothing here</b>No products match this filter.</div></td></tr>`;
+  const low = DB.products.filter(p=>stockStatus(p)==="low").length;
+  const out = DB.products.filter(p=>stockStatus(p)==="out").length;
+  return `
+  <div class="grid cols-4" style="margin-bottom:16px">
+    <div class="panel kpi"><div class="k-label">Stock value (at cost)</div><div class="k-value">${money(stockValue())}</div><div class="k-foot">What the shelf is worth</div></div>
+    <div class="panel kpi"><div class="k-label">Healthy items</div><div class="k-value" style="color:var(--green)">${DB.products.length-low-out}</div><div class="k-foot">Above reorder level</div></div>
+    <div class="panel kpi"><div class="k-label">Low stock</div><div class="k-value" style="color:var(--amber)">${low}</div><div class="k-foot">Reorder soon</div></div>
+    <div class="panel kpi"><div class="k-label">Out of stock</div><div class="k-value" style="color:${out?"var(--red)":"var(--green)"}">${out}</div><div class="k-foot">${out?"Blocking sales":"Nothing blocked"}</div></div>
+  </div>
+  <div class="panel">
+    <div class="toolbar">
+      <div class="grow" style="display:flex;gap:8px;align-items:center">
+        <select class="input" onchange="setStockFilter(this.value)" aria-label="Filter stock">
+          <option value="all" ${state.stockFilter==="all"?"selected":""}>All products</option>
+          <option value="low" ${state.stockFilter==="low"?"selected":""}>Low stock</option>
+          <option value="out" ${state.stockFilter==="out"?"selected":""}>Out of stock</option>
+        </select>
+        <span class="muted small">${rows.length} shown</span>
+      </div>
+      <button class="btn ghost sm" onclick="openPurchase()">+ Restock an item</button>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Product</th><th class="num">Opening</th><th class="num">Purchased</th><th class="num">Sold</th><th class="num">On hand</th><th class="num">Reorder</th><th class="num">Value</th><th>Status</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
+  </div>
+  <p class="hint" style="margin-top:10px">Opening stock is the starting count you enter once. Every purchase adds to it and every sale subtracts from it — the balance is always live.</p>`;
+}
+function setStockFilter(v){ state.stockFilter = v; render(); }
+/* ---------- reports ---------- */
+let reportMonth = thisMonth();
+function renderReports(){
+  const months = monthOptions();
+  if(!months.includes(reportMonth)) reportMonth = months[0] || thisMonth();
+  const s = salesIn(reportMonth), pu = purchasesIn(reportMonth), cogs = cogsIn(reportMonth);
+  const profit = s.revenue - cogs;
+  const margin = s.revenue ? (profit/s.revenue)*100 : 0;
+
+  const byProduct = {};
+  s.rows.forEach(x=>{
+    const p = productById(x.productId);
+    const key = p ? p.id : "deleted";
+    if(!byProduct[key]) byProduct[key] = { name:p?p.name:"Deleted product", cat:p?p.cat:"—", qty:0, revenue:0, cost:0 };
+    byProduct[key].qty += n(x.qty);
+    byProduct[key].revenue += n(x.qty)*n(x.rate);
+    byProduct[key].cost += n(x.qty)*(p?n(p.cost):0);
+  });
+  const prodRows = Object.values(byProduct).sort((a,b)=>b.revenue-a.revenue);
+  const prodHtml = prodRows.length ? prodRows.map(r=>`<tr>
+    <td><div class="p-name">${esc(r.name)}</div><div class="p-code">${esc(r.cat)}</div></td>
+    <td class="num">${qty(r.qty)}</td><td class="num">${money(r.revenue)}</td>
+    <td class="num" style="color:var(--green)">${money(r.revenue-r.cost)}</td>
+    <td class="num">${r.revenue?((r.revenue-r.cost)/r.revenue*100).toFixed(0):0}%</td>
+  </tr>`).join("") : `<tr><td colspan="5"><div class="empty"><b>No sales in ${monthLabel(reportMonth)}</b>Choose another month or record a sale.</div></td></tr>`;
+
+  const byCat = {};
+  s.rows.forEach(x=>{ const p=productById(x.productId); const cat=p?p.cat:"—"; byCat[cat]=(byCat[cat]||0)+n(x.qty)*n(x.rate); });
+  const catRows = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const catTotal = catRows.reduce((sum,r)=>sum+r[1],0);
+  const catHtml = catRows.length ? catRows.map(([cat,val])=>`
+    <div class="bar-row"><div class="n">${esc(cat)}</div><div class="v">${money(val)}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.max(3,(val/catTotal)*100)}%"></div></div></div>`).join("")
+    : `<div class="empty" style="padding:20px 0"><b>No category data</b>Record a sale for this month.</div>`;
+
+  const salesRows = s.rows.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  const salesHtml = salesRows.length ? salesRows.map(x=>{
+    const p=productById(x.productId);
+    return `<tr><td>${dateLabel(x.date)}</td><td>${esc(x.customer)}</td><td>${p?esc(p.name):"—"}</td><td class="num">${qty(x.qty)}</td><td class="num">${money(n(x.qty)*n(x.rate))}</td></tr>`;
+  }).join("") : `<tr><td colspan="5"><div class="empty" style="padding:20px"><b>No sales</b>Nothing invoiced this month.</div></td></tr>`;
+
+  const purchaseRows = pu.rows.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  const purchaseHtml = purchaseRows.length ? purchaseRows.map(x=>{
+    const p=productById(x.productId);
+    return `<tr><td>${dateLabel(x.date)}</td><td>${esc(x.supplier)}</td><td>${p?esc(p.name):"—"}</td><td class="num">${qty(x.qty)}</td><td class="num">${money(n(x.qty)*n(x.rate))}</td></tr>`;
+  }).join("") : `<tr><td colspan="5"><div class="empty" style="padding:20px"><b>No purchases</b>Nothing received this month.</div></td></tr>`;
+
+  return `
+  <div class="no-print toolbar" style="padding:0 0 14px;border:0">
+    <div class="grow" style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+      <select class="input" onchange="setReportMonth(this.value)" aria-label="Report month">
+        ${months.map(m=>`<option value="${m}" ${m===reportMonth?"selected":""}>${monthLabel(m)}</option>`).join("")}
+      </select>
+      <span class="muted small">Gross profit = sales − cost of goods sold. Purchases are cash out, not cost of goods.</span>
+    </div>
+    <button class="btn ghost sm" onclick="exportReportCsv()">Export CSV</button>
+    <button class="btn sm" onclick="window.print()">Print / PDF</button>
+  </div>
+
+  <div class="print-head">
+    <div><h1>${esc(BRAND.company)}</h1><p>Monthly operations report · ${monthLabel(reportMonth)}</p></div>
+    <div style="text-align:right"><p>Generated ${dateLabel(today())}<br>Prepared with Zeroth Inventory Lite</p></div>
+  </div>
+
+  <div class="grid cols-4" style="margin-bottom:16px">
+    <div class="panel kpi"><div class="k-label">Sales revenue</div><div class="k-value">${money(s.revenue)}</div><div class="k-foot">${s.rows.length} invoices · ${qty(s.units)} units</div></div>
+    <div class="panel kpi"><div class="k-label">Cost of goods sold</div><div class="k-value">${money(cogs)}</div><div class="k-foot">At product cost price</div></div>
+    <div class="panel kpi"><div class="k-label">Gross profit</div><div class="k-value" style="color:${profit>=0?"var(--green)":"var(--red)"}">${money(profit)}</div><div class="k-foot">${s.revenue?margin.toFixed(1)+"% margin":"No sales this month"}</div></div>
+    <div class="panel kpi"><div class="k-label">Purchases</div><div class="k-value">${money(pu.spend)}</div><div class="k-foot">${pu.rows.length} ${pu.rows.length===1?"entry":"entries"} · stock added</div></div>
+  </div>
+
+  <div class="split" style="margin-bottom:16px">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Product performance</h2><p>Sold in ${monthLabel(reportMonth)}</p></div><div class="right"><span class="badge gold">${monthLabel(reportMonth)}</span></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Product</th><th class="num">Qty</th><th class="num">Revenue</th><th class="num">Gross profit</th><th class="num">Margin</th></tr></thead><tbody>${prodHtml}</tbody></table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Revenue by category</h2><p>Share of sales this month</p></div></div>
+      <div class="panel-body" style="padding-top:8px">${catHtml}</div>
+    </div>
+  </div>
+
+  <div class="grid cols-2">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Sales register</h2><p>${monthLabel(reportMonth)} · ${money(s.revenue)}</p></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Product</th><th class="num">Qty</th><th class="num">Amount</th></tr></thead><tbody>${salesHtml}</tbody></table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Purchase register</h2><p>${monthLabel(reportMonth)} · ${money(pu.spend)}</p></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Supplier</th><th>Product</th><th class="num">Qty</th><th class="num">Amount</th></tr></thead><tbody>${purchaseHtml}</tbody></table></div>
+    </div>
+  </div>
+  <p class="hint" style="margin-top:12px">Demo report generated from fictional data. Your live system uses your products, suppliers and customers.</p>`;
+}
+function setReportMonth(v){ reportMonth = v; render(); }
+function csvDownload(filename, header, rows){
+  const content = [header, ...rows].map(r => r.map(v => `"${String(v==null?"":v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  const blob = new Blob(["\ufeff"+content], { type:"text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+function exportReportCsv(){
+  const s = salesIn(reportMonth);
+  const rows = s.rows.map(x=>{
+    const p = productById(x.productId);
+    return [x.date, x.invoice||"", x.customer, p?p.name:"", p?p.code:"", x.qty, x.rate, n(x.qty)*n(x.rate), p?n(p.cost)*n(x.qty):0];
+  });
+  csvDownload("zeroth-sales-"+reportMonth+".csv",
+    ["Date","Invoice","Customer","Product","Code","Qty","Rate","Revenue","Cost"], rows);
+  toast("Sales CSV downloaded");
+}
+
+/* ---------- modal ---------- */
+function openModal(title, body, footer, wide){
+  const root = document.getElementById("modalRoot");
+  root.innerHTML = `<div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+    <div class="modal ${wide?"wide":""}" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+      <div class="modal-head"><h3>${esc(title)}</h3><button class="icon-btn" style="margin-left:auto" onclick="closeModal()" aria-label="Close">✕</button></div>
+      <div class="modal-body">${body}</div>
+      ${footer?`<div class="modal-foot">${footer}</div>`:""}
+    </div></div>`;
+  root.classList.add("open");
+  document.body.classList.add("modal-open");
+  setTimeout(()=>{ const f = root.querySelector("input,select,textarea,button"); if(f) f.focus(); },40);
+}
+function closeModal(){
+  document.getElementById("modalRoot").classList.remove("open");
+  document.getElementById("modalRoot").innerHTML = "";
+  document.body.classList.remove("modal-open");
+}
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+
+/* ---------- demo guide ---------- */
+function demoGuide(){
+  openModal("15-minute demo script", `
+    <p class="hint" style="margin-top:0">Use this order on a Google Meet call. Keep it concrete — one product, one number, one decision.</p>
+    <div class="list-row" style="align-items:flex-start">
+      <div class="list-dot in">1</div>
+      <div class="list-main"><b>Start with the owner dashboard</b><span>Point at stock value, sales this month and low-stock alerts. Ask: "Which of these numbers do you calculate manually today?"</span></div>
+    </div>
+    <div class="list-row" style="align-items:flex-start">
+      <div class="list-dot in">2</div>
+      <div class="list-main"><b>Open Stock → filter Low stock</b><span>Show the ledger for one item: opening + purchased − sold = on hand. This is the core idea they need to trust.</span></div>
+    </div>
+    <div class="list-row" style="align-items:flex-start">
+      <div class="list-dot in">3</div>
+      <div class="list-main"><b>Record a sale live</b><span>Use a product with stock, show the balance drop, then try a quantity above stock to show the guard rail.</span></div>
+    </div>
+    <div class="list-row" style="align-items:flex-start">
+      <div class="list-dot in">4</div>
+      <div class="list-main"><b>Finish on Monthly reports</b><span>Show revenue, gross profit and the product table. Export the CSV or print the PDF. Then ask for their product list and a 5–7 day start date.</span></div>
+    </div>
+    <div style="margin-top:16px;padding:12px 14px;border:1px solid rgba(201,171,115,.24);background:var(--gold-soft);border-radius:9px">
+      <b style="font-size:12px;color:var(--gold)">Close:</b>
+      <span style="font-size:12px;color:var(--muted)">"This is the same structure we set up with your products, suppliers and customers. ₹4,999, 50% advance, first version in 5–7 days."</span>
+    </div>`,
+    `<button class="btn ghost" onclick="closeModal()">Close</button><button class="btn primary" onclick="closeModal();go('stock')">Open stock view</button>`);
+}
+
+/* ---------- reset & init ---------- */
+function resetDemo(){
+  if(!confirm("Reset all demo data to the original fictional sample?")) return;
+  DB = seedDb(); save(); state.productSearch=""; state.stockFilter="all"; reportMonth = thisMonth();
+  render(); toast("Demo data reset");
+}
+function init(){
+  document.querySelectorAll(".nav-btn").forEach(b=>{
+    const ico = b.querySelector(".ico");
+    if(ico) ico.innerHTML = ICONS[b.dataset.view] || "";
+  });
+  const hash = (location.hash||"").replace("#","");
+  if(VIEW_META[hash]) state.view = hash;
+  render();
+}
+init();
+</script>
+</body>
+</html>

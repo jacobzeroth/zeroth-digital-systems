@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zeroth Digital Systems — Simplify. Automate. Scale.</title>
+<meta name="description" content="Zeroth Digital Systems builds simple dashboards, inventory and order systems for small manufacturers. Delivered remotely in days. Introductory pricing from ₹2,999.">
+<meta name="theme-color" content="#080B10">
+<style>
+:root{
+  --paper:#080B10;
+  --paper-2:#111720;
+  --paper-3:#1B2633;
+  --ink:#F4F6F8;
+  --ink-2:#D5DCE5;
+  --muted:#929EAD;
+  --muted-2:#929EAD;
+  --line:#26313D;
+  --line-strong:#354252;
+  --bronze:#B9F36B;
+  --bronze-2:#B9F36B;
+  --bronze-3:#B9F36B;
+  --navy:#111720;
+  --cream:#F4F6F8;
+  --cream-muted:#929EAD;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --shell:1200px;
+  --pad:40px;
+  --ease:cubic-bezier(.2,.65,.25,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font:16px/1.65 var(--sans);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+::selection{background:var(--bronze);color:var(--paper)}
+img{max-width:100%}
+a{color:inherit}
+h1,h2,h3,h4{font-weight:400}
+section[id]{scroll-margin-top:96px}
+.shell{max-width:var(--shell);margin:0 auto;padding:0 var(--pad)}
+.skip{position:absolute;left:-9999px;top:0;background:var(--bronze);color:var(--paper);padding:10px 16px;z-index:200}
+.skip:focus{left:16px;top:16px}
+
+/* ---------- masthead ---------- */
+.masthead{
+  position:sticky;top:0;z-index:60;
+  background:rgba(8,11,16,.86);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border-top:2px solid var(--bronze);
+  border-bottom:1px solid var(--line);
+}
+.mast-in{display:flex;align-items:center;justify-content:space-between;gap:32px;height:76px}
+.brand{display:flex;align-items:center;gap:13px;text-decoration:none;color:var(--ink);flex:none}
+.brand-mark{
+  width:30px;height:30px;background:var(--bronze);color:var(--paper);
+  display:grid;place-items:center;font-family:var(--serif);font-size:16px;line-height:1;
+  padding-bottom:2px;
+}
+.brand-mark::before{content:"Z"}
+.brand-name{display:block;font-family:var(--serif);font-size:19px;line-height:1.05;letter-spacing:.01em}
+.brand-sub{display:block;font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.nav{display:flex;align-items:center;gap:28px}
+.nav a{
+  font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+  text-decoration:none;padding:7px 0;border-bottom:1px solid transparent;
+  transition:color .2s var(--ease),border-color .2s var(--ease);
+}
+.nav a:hover{color:var(--ink);border-color:var(--bronze)}
+.mast-cta{
+  display:inline-flex;align-items:center;gap:8px;flex:none;
+  font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;
+  color:var(--ink);border-bottom:1px solid var(--bronze);padding-bottom:5px;
+  transition:color .2s var(--ease),border-color .2s var(--ease);
+}
+.mast-cta:hover{color:var(--bronze)}
+.menu{
+  display:none;background:none;border:1px solid var(--line-strong);color:var(--ink);
+  height:38px;padding:0 12px;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  line-height:1;cursor:pointer;flex:none;
+}
+
+/* ---------- hero ---------- */
+.hero{padding:clamp(48px,6vw,80px) 0 0}
+.kicker{
+  display:flex;align-items:center;gap:14px;margin:0 0 28px;
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--bronze);
+}
+.kicker::before{content:"";width:36px;height:1px;background:var(--bronze);flex:none}
+h1{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(42px,6.2vw,84px);line-height:.99;letter-spacing:-.03em;
+  margin:0;max-width:21ch;
+}
+h1 em{font-style:italic;color:var(--bronze)}
+.hero-row{
+  display:grid;grid-template-columns:minmax(0,4.7fr) minmax(0,7.3fr);
+  gap:clamp(32px,5vw,72px);align-items:start;
+  margin-top:clamp(40px,5vw,58px);
+}
+.hero-lede{font-size:17px;line-height:1.68;color:var(--muted);max-width:44ch;margin:0}
+.hero-actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:32px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:15px 24px;border:1px solid var(--ink);
+  font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;
+  transition:background .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease);
+}
+.btn-solid{background:var(--bronze);border-color:var(--bronze);color:var(--paper)}
+.btn-solid:hover{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.btn-ghost{background:transparent;color:var(--ink)}
+.btn-ghost:hover{background:var(--ink);color:var(--paper)}
+.link-arrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;
+  color:var(--ink);border-bottom:1px solid var(--line-strong);padding-bottom:5px;
+  transition:color .2s var(--ease),border-color .2s var(--ease);
+}
+.link-arrow:hover{color:var(--bronze);border-color:var(--bronze)}
+.hero-note{font-size:11.5px;color:var(--muted-2);margin:18px 0 0;line-height:1.6}
+.facts{list-style:none;margin:38px 0 0;padding:0;border-top:1px solid var(--line-strong)}
+.facts li{
+  display:flex;align-items:baseline;justify-content:space-between;gap:18px;
+  padding:11px 0;border-bottom:1px solid var(--line);
+}
+.facts span{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);flex:none}
+.facts b{font-weight:500;font-size:13px;text-align:right}
+.hero-fig{margin:0}
+.hero-fig img{
+  display:block;width:100%;height:auto;
+  border:1px solid var(--line-strong);
+  box-shadow:0 30px 70px -50px rgba(0,0,0,.75);
+}
+.hero-fig figcaption{
+  display:flex;justify-content:space-between;gap:16px;margin-top:11px;padding-top:10px;
+  border-top:1px solid var(--line);font-size:9.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted-2);
+}
+.hero-fig figcaption b{font-weight:500;color:var(--bronze)}
+
+/* ---------- section frame ---------- */
+.sec{padding:clamp(72px,9vw,112px) 0;border-top:1px solid var(--line)}
+.sec-head{
+  display:grid;grid-template-columns:190px minmax(0,1fr);
+  gap:clamp(24px,4vw,56px);margin-bottom:clamp(40px,5vw,62px);
+}
+.sec-label{
+  margin:0;font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);line-height:1.7;
+}
+.sec-label .num{
+  display:block;font-family:var(--serif);font-size:13px;letter-spacing:.02em;
+  color:var(--bronze);margin-bottom:9px;
+}
+.sec-head h2,.faq-aside h2,.demo-copy h2,.closing h2{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(30px,3.7vw,46px);line-height:1.07;letter-spacing:-.022em;
+  margin:0;max-width:20ch;
+}
+.lede{font-size:16px;line-height:1.72;color:var(--muted);max-width:58ch;margin:20px 0 0}
+
+/* ---------- problem ---------- */
+.pain-list{border-top:1px solid var(--ink)}
+.pain{
+  display:grid;grid-template-columns:58px minmax(0,.95fr) minmax(0,1.1fr);
+  gap:clamp(16px,3vw,34px);align-items:baseline;
+  padding:30px 0;border-bottom:1px solid var(--line);
+}
+.pain .idx{font-family:var(--serif);font-size:12px;letter-spacing:.06em;color:var(--bronze)}
+.pain h3{font-family:var(--serif);font-size:clamp(20px,2.1vw,26px);line-height:1.2;letter-spacing:-.012em;margin:0}
+.pain p{margin:0;font-size:14.5px;line-height:1.72;color:var(--muted);max-width:54ch}
+
+/* ---------- services ---------- */
+.svc-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+}
+.svc{
+  display:flex;
+  flex-direction:column;
+  padding:30px 26px;
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  border-top:2px solid var(--line-strong);
+  border-radius:12px;
+  transition:transform .25s ease,border-color .25s ease;
+}
+
+.svc:hover{
+  transform:translateY(-5px);
+  border-color:var(--bronze);
+}
+.svc.rec{
+  background:var(--paper-3);
+  border:1px solid var(--bronze);
+  border-top:3px solid var(--bronze);
+  border-radius:12px;
+  padding:29px 26px;
+}
+.svc-idx{
+  display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:16px;
+}
+.svc-idx .rec-tag{color:var(--bronze);font-weight:600;letter-spacing:.14em}
+.svc.rec .svc-idx{color:var(--bronze)}
+.svc h3{font-family:var(--serif);font-size:25px;line-height:1.15;letter-spacing:-.01em;margin:0 0 10px}
+.svc .pitch{font-size:13.5px;line-height:1.62;color:var(--muted);margin:0 0 20px;min-height:44px}
+.svc .price{
+  display:flex;align-items:baseline;gap:10px;
+  padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.svc .price b{font-family:var(--serif);font-size:31px;font-weight:400;letter-spacing:-.015em;line-height:1}
+.svc .price span{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted-2)}
+.svc ul{list-style:none;margin:0;padding:0}
+.svc li{
+  display:flex;gap:10px;font-size:13.5px;line-height:1.5;color:var(--ink-2);
+  padding:8px 0;border-bottom:1px solid var(--line);
+}
+.svc li::before{content:"—";color:var(--bronze);flex:none}
+.svc .best{font-size:12px;line-height:1.6;color:var(--muted);margin:16px 0 20px}
+.svc .best b{color:var(--ink);font-weight:600}
+.svc .svc-actions{margin-top:auto;padding-top:2px;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.note-line{
+  display:flex;gap:14px;margin-top:32px;padding-top:18px;border-top:1px solid var(--line);
+  font-size:12.5px;line-height:1.7;color:var(--muted);
+}
+.note-line::before{content:"";width:7px;height:7px;background:var(--bronze);flex:none;margin-top:7px}
+.note-line b{color:var(--ink);font-weight:600}
+
+/* ---------- demo plate ---------- */
+.plate{background:var(--navy);color:var(--cream);padding:clamp(72px,9vw,110px) 0}
+.demo-grid{
+  display:grid;grid-template-columns:minmax(0,4.6fr) minmax(0,7.4fr);
+  gap:clamp(32px,5vw,64px);align-items:start;
+}
+.demo-copy .sec-label{color:var(--cream-muted)}
+.demo-copy .sec-label .num{color:var(--bronze-3)}
+.demo-copy h2{color:var(--ink);max-width:16ch}
+.demo-copy .lede{color:var(--cream-muted)}
+.demo-list{list-style:none;margin:30px 0 0;padding:0;border-top:1px solid var(--line-strong)}
+.demo-list li{
+  display:grid;grid-template-columns:24px 1fr;gap:14px;
+  padding:13px 0;border-bottom:1px solid var(--line);
+  font-size:13.5px;line-height:1.6;color:var(--ink-2);
+}
+.demo-list .c{font-family:var(--serif);font-size:11px;color:var(--bronze-3);padding-top:2px}
+.demo-actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:28px}
+.btn-light{background:var(--bronze);border-color:var(--bronze);color:var(--paper)}
+.btn-light:hover{background:var(--cream);border-color:var(--cream);color:var(--paper)}
+.link-arrow.on-dark{color:var(--cream);border-color:var(--line-strong)}
+.link-arrow.on-dark:hover{color:var(--bronze-3);border-color:var(--bronze-3)}
+.demo-shot{margin:0}
+.demo-shot .frame{border:1px solid var(--line-strong);padding:10px;background:rgba(255,255,255,.03)}
+.demo-shot img{display:block;width:100%;height:auto}
+.demo-shot figcaption{
+  display:flex;justify-content:space-between;gap:16px;margin-top:12px;
+  font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+}
+.demo-shot figcaption b{font-weight:500;color:var(--bronze-3)}
+.demo-foot{font-size:10.5px;letter-spacing:.04em;color:var(--muted);margin:16px 0 0}
+
+/* ---------- process ---------- */
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.step{border-top:1px solid var(--ink);border-right:1px solid var(--line);padding:24px 26px 0 0}
+.step:not(:first-child){padding-left:26px}
+.step:last-child{border-right:0;padding-right:0}
+.step-n{font-family:var(--serif);font-size:12px;letter-spacing:.08em;color:var(--bronze)}
+.step h3{font-family:var(--serif);font-size:20px;line-height:1.25;letter-spacing:-.01em;margin:14px 0 10px}
+.step p{font-size:13.5px;line-height:1.68;color:var(--muted);margin:0}
+
+/* ---------- fit ---------- */
+.fit{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--ink)}
+.fit-col{padding:28px 38px 4px 0}
+.fit-col + .fit-col{border-left:1px solid var(--line);padding-left:38px;padding-right:0}
+.fit-col h3{font-family:var(--serif);font-size:22px;letter-spacing:-.01em;margin:0 0 4px;display:flex;align-items:baseline;gap:10px}
+.fit-mark{font-family:var(--serif);font-size:15px;line-height:1}
+.fit-yes .fit-mark{color:var(--bronze)}
+.fit-no .fit-mark{color:var(--muted-2)}
+.fit-col ul{list-style:none;margin:18px 0 0;padding:0}
+.fit-col li{
+  position:relative;padding:12px 0 12px 22px;border-top:1px solid var(--line);
+  font-size:14px;line-height:1.62;color:var(--ink-2);
+}
+.fit-col li::before{position:absolute;left:0;top:12px;font-family:var(--serif);font-size:13px}
+.fit-yes li::before{content:"+";color:var(--bronze)}
+.fit-no li::before{content:"–";color:var(--muted-2)}
+
+/* ---------- pricing ---------- */
+.price-table{border-top:1px solid var(--ink)}
+.price-row{
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.55fr) minmax(0,.6fr);
+  gap:clamp(16px,3vw,32px);align-items:baseline;
+  padding:26px 0;border-bottom:1px solid var(--line);
+}
+.price-row.head{padding:0 0 12px;border-bottom:1px solid var(--line-strong)}
+.price-row.head div{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2)}
+.price-row.head div:last-child{text-align:right}
+.pr-name{font-family:var(--serif);font-size:22px;line-height:1.2;letter-spacing:-.01em}
+.pr-name span{
+  display:block;font-family:var(--sans);font-size:9px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--bronze);margin-bottom:7px;
+}
+.pr-desc{font-size:13.5px;line-height:1.65;color:var(--muted);margin:0}
+.pr-meta{text-align:right}
+.pr-amt{display:block;font-family:var(--serif);font-size:25px;line-height:1.1;letter-spacing:-.01em;white-space:nowrap}
+.pr-time{display:block;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted-2);margin-top:5px}
+
+/* ---------- faq ---------- */
+.faq-layout{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:clamp(32px,5vw,72px);align-items:start}
+.faq-aside{position:sticky;top:108px}
+.faq-aside .sec-label{margin-bottom:18px}
+.faq-aside p{font-size:13.5px;line-height:1.7;color:var(--muted);margin:18px 0 0;max-width:30ch}
+.faq{border-top:1px solid var(--ink)}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{
+  position:relative;list-style:none;cursor:pointer;
+  padding:20px 44px 20px 0;font-family:var(--serif);font-size:18px;line-height:1.4;
+  letter-spacing:-.005em;
+}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::marker{content:""}
+.faq summary::after{
+  content:"+";position:absolute;right:0;top:15px;font-size:21px;font-weight:300;
+  color:var(--bronze);line-height:1;transition:transform .2s var(--ease);
+}
+.faq details[open] summary::after{content:"–"}
+.faq .a{padding:0 44px 22px 0;font-size:14px;line-height:1.72;color:var(--muted);max-width:62ch}
+
+/* ---------- closing ---------- */
+.closing{background:var(--paper-2);border-top:1px solid var(--ink);padding:clamp(72px,9vw,108px) 0}
+.closing-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(32px,6vw,80px);align-items:start}
+.closing h2{max-width:17ch}
+.closing p{font-size:15.5px;line-height:1.7;color:var(--muted);margin:20px 0 0;max-width:44ch}
+.closing-note{font-size:11px;letter-spacing:.04em;color:var(--muted-2);margin:26px 0 0}
+.contact-list{border-top:1px solid var(--ink)}
+.contact-item{
+  display:grid;grid-template-columns:104px minmax(0,1fr) 18px;align-items:baseline;
+  gap:14px;padding:17px 0;border-bottom:1px solid var(--line-strong);
+  text-decoration:none;color:var(--ink);
+}
+.contact-item .ci-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.contact-item .ci-value{font-family:var(--serif);font-size:clamp(16px,1.7vw,20px);line-height:1.3;overflow-wrap:anywhere}
+.contact-item .ci-arrow{text-align:right;font-size:14px;color:var(--bronze)}
+a.contact-item:hover .ci-value{color:var(--bronze)}
+.contact-item.static a{text-decoration:underline;text-decoration-color:var(--line-strong);text-underline-offset:3px}
+.contact-item.static a:hover{color:var(--bronze);text-decoration-color:var(--bronze)}
+.contact-item.static .ci-arrow{color:var(--muted-2)}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line);padding:56px 0 30px}
+.foot-grid{display:grid;grid-template-columns:minmax(0,1.5fr) repeat(3,minmax(0,1fr));gap:clamp(24px,4vw,48px)}
+.foot-brand p{font-size:13px;line-height:1.7;color:var(--muted);max-width:34ch;margin:16px 0 0}
+.foot-tag{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--bronze);margin-top:12px}
+.foot-col h3{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);margin:0 0 14px;font-weight:400}
+.foot-col a{display:block;font-size:12.5px;line-height:1.5;color:var(--ink-2);text-decoration:none;padding:4px 0}
+.foot-col a:hover{color:var(--bronze)}
+.foot-bottom{
+  display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  margin-top:48px;padding-top:18px;border-top:1px solid var(--line);
+  font-size:10.5px;letter-spacing:.02em;color:var(--muted-2);
+}
+.foot-bottom p{margin:0}
+
+/* ---------- reveal ---------- */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .reveal{opacity:1;transform:none;transition:none}
+}
+
+/* ---------- responsive ---------- */
+@media(max-width:1040px){
+  :root{--pad:32px}
+  .mast-cta{display:none}
+  .hero-row{grid-template-columns:1fr;gap:44px}
+  .hero-lede{max-width:56ch}
+  .facts{max-width:520px}
+  .demo-grid{grid-template-columns:1fr;gap:44px}
+  .demo-copy h2{max-width:22ch}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .step:nth-child(2){border-right:0;padding-right:0}
+  .step:nth-child(3),.step:nth-child(4){border-top:1px solid var(--line);margin-top:26px}
+  .step:nth-child(3){padding-left:0}
+  .svc-grid{grid-template-columns:1fr}
+  .svc .pitch{min-height:0}
+  .svc .svc-actions{flex-direction:row;flex-wrap:wrap;gap:20px;margin-top:20px}
+  .faq-layout{grid-template-columns:1fr;gap:32px}
+  .faq-aside{position:static}
+  .closing-grid{grid-template-columns:1fr;gap:40px}
+  .fit-col{padding-right:28px}
+  .fit-col + .fit-col{padding-left:28px}
+}
+@media(max-width:880px){
+  :root{--pad:22px}
+  .mast-in{height:68px}
+  .menu{display:block}
+  .nav{
+    position:absolute;top:100%;left:0;right:0;display:none;
+    flex-direction:column;align-items:stretch;gap:0;
+    background:var(--paper);border-bottom:1px solid var(--line);
+    padding:6px var(--pad) 16px;
+  }
+  .nav.open{display:flex}
+  .nav a{width:100%;padding:14px 0;border-bottom:1px solid var(--line);font-size:11px}
+  h1{max-width:16ch}
+  .hero{padding-top:40px}
+  .sec-head{grid-template-columns:1fr;gap:14px;margin-bottom:34px}
+  .sec-label .num{display:inline;margin-right:10px}
+  .pain{grid-template-columns:40px 1fr;gap:6px 16px;padding:24px 0}
+  .pain p{grid-column:2}
+  .steps{grid-template-columns:1fr}
+  .step,.step:not(:first-child){padding:22px 0 0;border-right:0}
+  .step + .step{border-top:1px solid var(--line);margin-top:22px}
+  .fit{grid-template-columns:1fr}
+  .fit-col,.fit-col + .fit-col{padding:24px 0 4px;border-left:0}
+  .fit-col + .fit-col{border-top:1px solid var(--line);margin-top:22px}
+  .price-row{grid-template-columns:1fr;gap:6px;padding:22px 0}
+  .price-row.head{display:none}
+  .pr-name{grid-column:1}
+  .pr-desc{grid-column:1;order:3;margin-top:2px}
+  .pr-meta{grid-column:1;order:2;display:flex;align-items:baseline;justify-content:space-between;gap:12px;text-align:left}
+  .pr-time{display:block;order:-1;margin-top:0}
+  .pr-amt{font-size:23px}
+  .closing h2{max-width:20ch}
+  .contact-item{grid-template-columns:88px minmax(0,1fr) 16px;gap:10px}
+  .contact-item .ci-value{font-size:15px}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .foot-brand{grid-column:1/-1}
+  .foot-bottom{flex-direction:column;gap:8px}
+}
+@media(max-width:520px){
+  .brand-name{font-size:17px}
+  .brand-sub{font-size:8px;letter-spacing:.2em}
+  .hero-actions{gap:16px}
+  .btn{width:100%}
+  .demo-actions .btn{width:100%}
+  .facts li{flex-direction:column;gap:2px;align-items:flex-start}
+  .facts b{text-align:left}
+  .foot-grid{grid-template-columns:1fr}
+  .hero-fig figcaption,.demo-shot figcaption{flex-direction:column;gap:4px}
+}
+</style>
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+<!-- CONTACT: founder details. -->
+<script>
+window.ZEROTH_CONTACT = {
+  whatsapp: "919176895044",
+  email: "founderofzeroth@gmail.com",
+  brochure: "zeroth-brochure.pdf",
+  demo: "zeroth-inventory-lite.html"
+};
+</script>
+</head>
+<body>
+<a class="skip" href="#top">Skip to content</a>
+
+<header class="masthead">
+  <div class="shell mast-in">
+    <a class="brand" href="#top" aria-label="Zeroth Digital Systems home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>
+        <span class="brand-name">Zeroth</span>
+        <span class="brand-sub">Digital Systems</span>
+      </span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="#services">Services</a>
+      <a href="#demo">Live demo</a>
+      <a href="#process">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a class="mast-cta" href="#contact" data-wa="I saw the Zeroth website and would like to book a free demo.">Book a Free Demo <span aria-hidden="true">→</span></a>
+    <button class="menu" id="menu" aria-expanded="false" aria-controls="nav">Menu</button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="shell">
+      <p class="kicker">Remote digital systems · Kallakurichi, India</p>
+      <h1>Run your factory from <em>one clear screen.</em></h1>
+
+      <div class="hero-row">
+        <div class="hero-copy">
+          <p class="hero-lede">We build practical digital systems that help manufacturers control inventory, manage orders and monitor business performance — all from one clear dashboard.</p>
+          <div class="hero-actions">
+            <a class="btn btn-solid" href="#contact"
+               data-wa="Hi Zeroth, I would like to book a free demo for my business.">
+              Book a Free Demo <span aria-hidden="true">→</span>
+            </a>
+            <a class="btn btn-ghost" href="zeroth-inventory-lite.html">
+              Explore Live Demo
+            </a>
+          </div>
+          <p class="hero-note">Introductory pilot pricing · scope agreed in writing before payment.</p>
+          <ul class="facts">
+            <li><span>Delivery</span><b>Fully remote</b></li>
+            <li><span>Delivery time</span><b>Based on selected system</b></li>
+            <li><span>Ownership</span><b>The data stays yours</b></li>
+            <li><span>Pricing</span><b>Introductory pilot rates</b></li>
+          </ul>
+        </div>
+        <figure class="hero-fig">
+          <img src="assets/demo-factory-crop.png" width="1342" height="1050" alt="Zeroth Factory Operations demo showing the order register and production stages">
+          <figcaption><span><b>Fig. 01</b> — Factory Operations</span><span>Live demo · fictional data</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="problem">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <p class="sec-label"><span class="num">01</span>The problem</p>
+        <div>
+          <h2>Your business runs on memory, Excel and WhatsApp.</h2>
+          <p class="lede">That works until it doesn't. The problem is rarely effort — it's that the numbers live in five different places.</p>
+        </div>
+      </div>
+      <div class="pain-list">
+        <div class="pain reveal">
+          <span class="idx">01</span>
+          <h3>Stock lives in your head</h3>
+          <p>You find out an item is finished when a customer is already waiting. Purchases and sales never quite meet in the same register.</p>
+        </div>
+        <div class="pain reveal">
+          <span class="idx">02</span>
+          <h3>Month-end takes days</h3>
+          <p>Sales, purchases and profit are stitched together from notebooks, bills and three versions of the same spreadsheet.</p>
+        </div>
+        <div class="pain reveal">
+          <span class="idx">03</span>
+          <h3>Orders disappear in chat</h3>
+          <p>No single view of what is confirmed, what is in production, and what has been dispatched. Everyone asks everyone.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="services">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <p class="sec-label"><span class="num">02</span>Services</p>
+        <div>
+          <h2>Start small. Fix the expensive part first.</h2>
+          <p class="lede">Don't buy a platform. Buy one working system that removes a real daily headache. These are introductory pilot prices for the first few customers.</p>
+        </div>
+      </div>
+
+      <div class="svc-grid">
+        <article class="svc reveal">
+          <div class="svc-idx"><span>01 · Reporting</span></div>
+          <h3>Business Dashboard</h3>
+          <p class="pitch">Know your sales, expenses and profit without chasing registers.</p>
+          <div class="price"><b>₹2,999</b><span>one-time pilot</span></div>
+          <ul>
+            <li>Owner dashboard with monthly performance</li>
+            <li>Sales, expense and profit view</li>
+            <li>Google Sheets or hosted web page</li>
+            <li>One-page summary for your accountant</li>
+            <li>Built in 3–4 working days</li>
+          </ul>
+          <p class="best"><b>Best for:</b> owners who need clarity before adding complexity.</p>
+          <div class="svc-actions">
+            <a class="link-arrow" href="#contact" data-wa="I am interested in the Business Dashboard (₹2,999).">Start with a dashboard <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="svc rec reveal">
+          <div class="svc-idx"><span>02 · Stock control</span><span class="rec-tag">Recommended</span></div>
+          <h3>Inventory Management</h3>
+          <p class="pitch">Stop guessing what is in stock, what moved, and what to reorder.</p>
+          <div class="price"><b>₹4,999</b><span>one-time pilot</span></div>
+          <ul>
+            <li>Product master with codes and units</li>
+            <li>Purchase and sales registers</li>
+            <li>Live stock: opening + purchased − sold</li>
+            <li>Low-stock alerts and reorder levels</li>
+            <li>Monthly stock and profit report</li>
+            <li>Built in 5–7 working days</li>
+          </ul>
+          <p class="best"><b>Best for:</b> manufacturers and traders with 20–500 SKUs.</p>
+          <div class="svc-actions">
+            <a class="link-arrow" href="zeroth-inventory-lite.html">
+              See it live <span aria-hidden="true">→</span>
+            </a>
+            <a class="link-arrow" href="#contact"
+               data-wa="Hi Zeroth, I am interested in Inventory Management (₹4,999).">
+              Discuss inventory setup <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </article>
+
+        <article class="svc reveal">
+          <div class="svc-idx"><span>03 · Operations</span></div>
+          <h3>Factory Operations</h3>
+          <p class="pitch">Track orders, production stages and materials in one flow.</p>
+          <div class="price"><b>₹7,499</b><span>one-time pilot</span></div>
+          <ul>
+            <li>Order register with customer and due date</li>
+            <li>Production status by stage</li>
+            <li>Raw material vs finished goods</li>
+            <li>Dispatch and pending-order view</li>
+            <li>Weekly operations summary</li>
+            <li>Built in 7–10 working days</li>
+          </ul>
+          <p class="best"><b>Best for:</b> job-shop factories juggling 10+ live orders.</p>
+          <div class="svc-actions">
+            <a class="link-arrow" href="zeroth-factory-ops.html">See it live <span aria-hidden="true">→</span></a>
+            <a class="link-arrow" href="#contact" data-wa="I am interested in the Factory Operations System (₹7,499).">Discuss operations <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+      </div>
+
+      <p class="note-line reveal"><span><b>What every project includes:</b> a written scope, one round of revisions, remote setup, a short training call, and a screen-recorded walkthrough. 50% advance to start, balance on delivery. No monthly fee for the Lite systems.</span></p>
+    </div>
+  </section>
+
+  <section class="plate" id="demo">
+    <div class="shell demo-grid">
+      <div class="demo-copy reveal">
+        <p class="sec-label"><span class="num">03</span>The demo</p>
+        <h2>A working demo, not a promise.</h2>
+        <p class="lede">Open Zeroth Inventory Lite and use it like an owner. It is preloaded with fictional data from a small manufacturer — no signup, no sales call, no email required. The factory operations demo goes further: orders, production stages, material issue and dispatch in one flow.</p>
+        <ul class="demo-list">
+          <li><span class="c">01</span><span>See stock value, monthly sales and low-stock alerts on one dashboard.</span></li>
+          <li><span class="c">02</span><span>Open any product ledger: opening + purchased − sold, with a running balance.</span></li>
+          <li><span class="c">03</span><span>Record a sale and watch stock update instantly. Try to oversell — it blocks you.</span></li>
+          <li><span class="c">04</span><span>Print a monthly report or export it to CSV for your accountant.</span></li>
+        </ul>
+        <div class="demo-actions">
+          <a class="btn btn-light" href="zeroth-inventory-lite.html">Open Inventory Lite <span aria-hidden="true">→</span></a>
+          <a class="link-arrow on-dark" href="zeroth-factory-ops.html">Factory operations demo <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <figure class="demo-shot reveal">
+        <div class="frame">
+          <img src="assets/demo-inventory-crop.png" width="1342" height="1050" loading="lazy" alt="Zeroth Inventory Lite owner dashboard with stock value, sales, low-stock alerts and product ledger">
+        </div>
+        <figcaption><span><b>Fig. 02</b> — Inventory Lite, owner dashboard</span><span>Fictional demo data</span></figcaption>
+        <p class="demo-foot">Runs in your browser · Resets any time · No account needed</p>
+      </figure>
+    </div>
+  </section>
+
+  <section class="sec" id="process">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <p class="sec-label"><span class="num">04</span>Process</p>
+        <div>
+          <h2>From first call to working system in a week.</h2>
+          <p class="lede">No factory visits. No installation day. Everything happens over Google Meet, WhatsApp and a shared screen.</p>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-n">01</div>
+          <h3>20-minute call</h3>
+          <p>We look at your current register, product list and the one report you actually need. You leave with a clear recommendation — even if it is "don't buy this yet".</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">02</div>
+          <h3>Written scope</h3>
+          <p>You get a one-page scope: fields, screens, report, delivery date and price. 50% advance starts the work. No hidden add-ons.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">03</div>
+          <h3>Build &amp; review</h3>
+          <p>You see a working version in 3–7 days with your product names and sample data. We fix what is genuinely wrong within the agreed revision.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">04</div>
+          <h3>Train &amp; hand over</h3>
+          <p>A short training call, a recorded walkthrough, and admin access in your name. The data and the account stay yours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="fit">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <p class="sec-label"><span class="num">05</span>Fit</p>
+        <div>
+          <h2>Who this is for — and who it isn't.</h2>
+          <p class="lede">A small, focused system works when the business process is simple enough to describe. If it isn't, we should say so early.</p>
+        </div>
+      </div>
+      <div class="fit">
+        <div class="fit-col fit-yes reveal">
+          <h3><span class="fit-mark" aria-hidden="true">+</span> Good fit</h3>
+          <ul>
+            <li>Small manufacturers, job shops and traders with 20–500 products</li>
+            <li>Owner still checks stock, orders or month-end numbers personally</li>
+            <li>Data already exists in Excel, notebooks or WhatsApp — just not together</li>
+            <li>You can spare 2–3 hours across the week for setup and feedback</li>
+            <li>You want one useful system now, not a two-year ERP rollout</li>
+          </ul>
+        </div>
+        <div class="fit-col fit-no reveal">
+          <h3><span class="fit-mark" aria-hidden="true">–</span> Not a fit yet</h3>
+          <ul>
+            <li>You need statutory accounting, GST filing or payroll compliance</li>
+            <li>You need machine-level IoT, SCADA or production automation</li>
+            <li>Your process changes every week and cannot be written down</li>
+            <li>You need a 50-user ERP with approvals, costing and multi-plant logic</li>
+            <li>You are looking for the cheapest possible template with no scoping</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="pricing">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <p class="sec-label"><span class="num">06</span>Pricing</p>
+        <div>
+          <h2>One price. A written scope. No surprise invoice.</h2>
+          <p class="lede">These are introductory pilot prices, not a permanent rate card. The scope is agreed before any payment, and the balance is due only after you see the working system.</p>
+        </div>
+      </div>
+
+      <div class="price-table reveal">
+        <div class="price-row head" aria-hidden="true">
+          <div>Service</div>
+          <div>What is included</div>
+          <div>Price</div>
+        </div>
+        <div class="price-row">
+          <div class="pr-name"><span>01 · Reporting</span>Business Dashboard</div>
+          <p class="pr-desc">Owner dashboard with monthly sales, expenses and profit, plus a one-page summary for your accountant.</p>
+          <div class="pr-meta"><span class="pr-amt">₹2,999</span><span class="pr-time">3–4 working days</span></div>
+        </div>
+        <div class="price-row">
+          <div class="pr-name"><span>02 · Stock control</span>Inventory Management</div>
+          <p class="pr-desc">Product master, purchase and sales registers, live stock, low-stock alerts and a monthly stock and profit report.</p>
+          <div class="pr-meta"><span class="pr-amt">₹4,999</span><span class="pr-time">5–7 working days</span></div>
+        </div>
+        <div class="price-row">
+          <div class="pr-name"><span>03 · Operations</span>Factory Operations</div>
+          <p class="pr-desc">Order register, production stages, raw material and BOM, material issue, dispatch and a weekly operations summary.</p>
+          <div class="pr-meta"><span class="pr-amt">₹7,499</span><span class="pr-time">7–10 working days</span></div>
+        </div>
+      </div>
+
+      <p class="note-line reveal"><span><b>Payment:</b> 50% to start, 50% on delivery. <b>Included:</b> setup, one revision round, training call, recorded walkthrough. <b>Not included:</b> hardware, paid software licences, statutory filings, or ongoing support beyond the first 14 days.</span></p>
+    </div>
+  </section>
+
+  <section class="sec" id="faq">
+    <div class="shell faq-layout">
+      <aside class="faq-aside reveal">
+        <p class="sec-label"><span class="num">07</span>Questions</p>
+        <h2>Before you book a call.</h2>
+        <p>If something is missing, ask directly on WhatsApp. A short answer is better than a long brochure.</p>
+      </aside>
+      <div class="faq">
+        <details class="reveal">
+          <summary>Do I need to install any software?</summary>
+          <div class="a">Usually no. The system runs in a browser and is shared as a link. If you choose a Google Sheets build, you need a Google account — which is free. Nothing is installed on your factory computers unless we agree on it in the scope.</div>
+        </details>
+        <details class="reveal">
+          <summary>Who owns the data and the account?</summary>
+          <div class="a">You do. The Google account, spreadsheet or hosting is created in your name, and you keep admin access. Zeroth is the developer, not the owner of your business data. We do not use one customer's data in another customer's demo.</div>
+        </details>
+        <details class="reveal">
+          <summary>What does "one revision round" mean?</summary>
+          <div class="a">Within 14 days of delivery, you can send one consolidated list of changes that fall inside the agreed scope — labels, fields, calculations, layout. New modules or changed requirements are quoted separately before any work starts.</div>
+        </details>
+        <details class="reveal">
+          <summary>Will it work on my phone?</summary>
+          <div class="a">The dashboards and registers are responsive, so you can check stock or sales from a phone. Data entry is faster on a laptop, and that is what we recommend for purchases and sales entry.</div>
+        </details>
+        <details class="reveal">
+          <summary>Why is the price so low?</summary>
+          <div class="a">Three reasons: the first systems reuse a proven template, delivery is fully remote, and these are introductory prices while we build a public portfolio. The price will rise as case studies and repeatable modules replace the pilot phase.</div>
+        </details>
+        <details class="reveal">
+          <summary>Do you visit the factory?</summary>
+          <div class="a">No. The entire process is remote: Google Meet for the demo, WhatsApp for questions, and a shared screen for training. This keeps the price low and the delivery fast. If a visit is ever necessary, it is quoted separately and agreed in advance.</div>
+        </details>
+        <details class="reveal">
+          <summary>What do you need from me to start?</summary>
+          <div class="a">A product list (even a rough Excel), one sample purchase bill, one sample sales invoice, and the name of the report you currently prepare by hand. That is enough for a first working version.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing" id="contact">
+    <div class="shell closing-grid">
+      <div class="reveal">
+        <p class="sec-label"><span class="num">08</span>Contact</p>
+        <h2>Your first mission: replace one spreadsheet with something that works.</h2>
+        <p>Tell me what you track manually today. I will reply with a straight recommendation, a fixed scope and a delivery date — or tell you this is not worth buying yet.</p>
+        <p class="closing-note">Remote delivery across India · Kallakurichi, Tamil Nadu</p>
+      </div>
+      <div class="contact-list reveal">
+        <a class="contact-item" href="#contact" data-wa="Hi Zeroth, I would like to discuss an inventory or dashboard system for my business.">
+          <span class="ci-label">WhatsApp</span>
+          <span class="ci-value">+91 91768 95044</span>
+          <span class="ci-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="contact-item" href="#contact" data-email="Zeroth system enquiry">
+          <span class="ci-label">Email</span>
+          <span class="ci-value">founderofzeroth@gmail.com</span>
+          <span class="ci-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="contact-item" href="zeroth-brochure.pdf">
+          <span class="ci-label">Brochure</span>
+          <span class="ci-value">Two-page PDF</span>
+          <span class="ci-arrow" aria-hidden="true">↓</span>
+        </a>
+        <div class="contact-item static">
+          <span class="ci-label">Demo</span>
+          <span class="ci-value"><a href="zeroth-inventory-lite.html">Inventory</a> · <a href="zeroth-factory-ops.html">Factory ops</a></span>
+          <span class="ci-arrow" aria-hidden="true">→</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="shell">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="#top">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>
+            <span class="brand-name">Zeroth</span>
+            <span class="brand-sub">Digital Systems</span>
+          </span>
+        </a>
+        <p>Simple digital systems for small manufacturers. Dashboards, inventory, orders and reporting — built remotely, owned by you.</p>
+        <p class="foot-tag">Simplify. Automate. Scale.</p>
+      </div>
+      <div class="foot-col">
+        <h3>Services</h3>
+        <a href="#services">Business dashboard</a>
+        <a href="#services">Inventory management</a>
+        <a href="#services">Factory operations</a>
+        <a href="zeroth-inventory-lite.html">Inventory demo</a>
+        <a href="zeroth-factory-ops.html">Factory ops demo</a>
+      </div>
+      <div class="foot-col">
+        <h3>Company</h3>
+        <a href="#process">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="zeroth-brochure.pdf">Brochure</a>
+      </div>
+      <div class="foot-col">
+        <h3>Contact</h3>
+        <a href="#contact" data-wa="Hi Zeroth, I would like to discuss a system for my business.">WhatsApp</a>
+        <a href="#contact" data-email="Zeroth system enquiry">Email</a>
+        <a href="#contact">Book a call</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p>© <span id="year">2026</span> Zeroth Digital Systems. Built and delivered remotely.</p>
+      <p>Demo data is fictional. Prices are introductory and confirmed in writing before payment.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var c = window.ZEROTH_CONTACT || {};
+  // WhatsApp links
+  document.querySelectorAll("[data-wa]").forEach(function(a){
+    var msg = a.getAttribute("data-wa") || "Hi Zeroth, I would like to know more.";
+    if(c.whatsapp && c.whatsapp.indexOf("X") === -1){
+      a.href = "https://wa.me/" + c.whatsapp + "?text=" + encodeURIComponent(msg);
+      a.target = "_blank"; a.rel = "noopener";
+    } else {
+      a.href = "#contact";
+    }
+  });
+  // Email links
+  document.querySelectorAll("[data-email]").forEach(function(a){
+    var subject = a.getAttribute("data-email") || "Zeroth enquiry";
+    if(c.email && c.email.indexOf("example") === -1){
+      a.href = "mailto:" + c.email + "?subject=" + encodeURIComponent(subject);
+    } else {
+      a.href = "#contact";
+    }
+  });
+  // Mobile nav
+  var menu = document.getElementById("menu"), nav = document.getElementById("nav");
+  if(menu && nav){
+    menu.addEventListener("click", function(){
+      var open = nav.classList.toggle("open");
+      menu.setAttribute("aria-expanded", open ? "true" : "false");
+      menu.textContent = open ? "Close" : "Menu";
+    });
+    nav.querySelectorAll("a").forEach(function(a){
+      a.addEventListener("click", function(){
+        nav.classList.remove("open");
+        menu.textContent = "Menu";
+        menu.setAttribute("aria-expanded","false");
+      });
+    });
+  }
+  // Year
+  var y = document.getElementById("year"); if(y) y.textContent = new Date().getFullYear();
+  // Reveal on scroll
+  if("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+  } else {
+    document.querySelectorAll(".reveal").forEach(function(el){ el.classList.add("in"); });
+  }
+})();
+</script>
+</body>
+</html>

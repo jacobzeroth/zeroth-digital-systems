@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zeroth Factory Operations — Live Demo</title>
+<meta name="description" content="Zeroth Factory Operations: orders, production stages, raw materials and dispatch in one flow. Fictional demo data for a small manufacturer.">
+<style>
+:root{
+  --bg:#070d17;--bg-2:#0b1220;--panel:#101b2d;--panel-2:#152238;--panel-3:#1a2a42;
+  --line:#21324b;--line-soft:#1a293f;--text:#e9eef7;--muted:#92a4bd;--muted-2:#6d809a;
+  --gold:#c9ab73;--gold-2:#a07d3f;--gold-soft:rgba(201,171,115,.12);
+  --green:#3ddc97;--green-soft:rgba(61,220,151,.12);--red:#ff7f7f;--red-soft:rgba(255,127,127,.12);
+  --amber:#f0b95a;--amber-soft:rgba(240,185,90,.13);--blue:#74a9ff;--blue-soft:rgba(116,169,255,.12);
+  --violet:#b79cff;--violet-soft:rgba(183,156,255,.13);--teal:#4fd1c5;--teal-soft:rgba(79,209,197,.12);
+  --radius:14px;--radius-sm:9px;--shadow:0 26px 70px -34px rgba(0,0,0,.85);
+  --ui:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --display:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(900px 500px at 82% -8%,rgba(201,171,115,.07),transparent 60%),radial-gradient(700px 500px at -10% 20%,rgba(116,169,255,.06),transparent 55%),var(--bg);
+  color:var(--text);font:14px/1.55 var(--ui);-webkit-font-smoothing:antialiased;min-height:100vh;
+}
+body.modal-open{overflow:hidden}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+::selection{background:rgba(201,171,115,.3)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#243650;border-radius:20px;border:2px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- shell ---------- */
+.app{display:flex;min-height:100vh}
+.sidebar{width:256px;flex:0 0 256px;background:linear-gradient(180deg,#0a1322,#08101d);border-right:1px solid var(--line-soft);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:50}
+.brand{display:flex;align-items:center;gap:12px;padding:22px 20px 18px;border-bottom:1px solid var(--line-soft)}
+.brand-mark{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,#d8bf8c,#a07d3f);color:#0b1220;font-family:var(--display);font-size:22px;font-weight:700;box-shadow:0 8px 20px -10px rgba(201,171,115,.6)}
+.brand-name{font-family:var(--display);font-size:17px;font-weight:700;letter-spacing:.28em;line-height:1.1}
+.brand-sub{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-top:3px}
+.workspace{margin:14px 14px 6px;padding:12px 13px;border:1px solid var(--line-soft);border-radius:var(--radius-sm);background:linear-gradient(160deg,rgba(201,171,115,.07),rgba(116,169,255,.03))}
+.ws-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);font-weight:700}
+.ws-name{font-size:13px;font-weight:600;margin-top:4px;line-height:1.3}
+.ws-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.nav{padding:10px 10px 16px;display:flex;flex-direction:column;gap:2px}
+.nav-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);font-weight:700;padding:10px 12px 6px}
+.nav-btn{display:flex;align-items:center;gap:11px;width:100%;padding:9px 12px;border:0;border-radius:8px;background:transparent;color:var(--muted);text-align:left;font-size:13px;transition:.15s}
+.nav-btn svg{width:17px;height:17px;flex:0 0 17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;color:var(--muted-2)}
+.nav-btn:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.nav-btn.active{background:linear-gradient(90deg,rgba(201,171,115,.15),rgba(201,171,115,.04));color:#f3e6ce;box-shadow:inset 2px 0 var(--gold)}
+.nav-btn.active svg{color:var(--gold)}
+.nav-count{margin-left:auto;font-size:10px;font-weight:700;background:var(--red-soft);color:var(--red);padding:1px 6px;border-radius:20px}
+.side-foot{margin-top:auto;padding:14px 16px 18px;border-top:1px solid var(--line-soft)}
+.help-card{width:100%;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:11px 12px;color:var(--text);display:flex;gap:10px;align-items:flex-start}
+.help-card:hover{border-color:var(--gold-2)}
+.help-card b{display:block;font-size:12px;margin-bottom:2px}
+.help-card span{font-size:10.5px;color:var(--muted);line-height:1.4}
+.help-card .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(61,220,151,.13);margin-top:5px;flex:0 0 7px}
+.side-note{font-size:10px;color:var(--muted-2);line-height:1.5;margin-top:12px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;padding:14px 28px;background:rgba(7,13,23,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+.topbar h1{font-size:17px;font-weight:650;margin:0;letter-spacing:.01em}
+.topbar p{margin:1px 0 0;font-size:11.5px;color:var(--muted)}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.demo-pill{font-size:9px;font-weight:800;letter-spacing:.14em;background:var(--gold-soft);color:var(--gold);border:1px solid rgba(201,171,115,.28);padding:4px 8px;border-radius:20px}
+.menu-btn{display:none!important}
+.view{padding:24px 28px 48px;max-width:1400px;width:100%;margin:0 auto}
+
+/* ---------- primitives ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:9px 14px;border-radius:8px;font-size:12.5px;font-weight:600;transition:.15s;white-space:nowrap}
+.btn:hover{background:var(--panel-3);border-color:#2c4160}
+.btn.primary{background:linear-gradient(145deg,#d8bf8c,#b08c4b);border-color:#c9ab73;color:#171006;font-weight:700;box-shadow:0 10px 24px -14px rgba(201,171,115,.8)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--red);border-color:rgba(255,127,127,.28);background:var(--red-soft)}
+.btn.sm{padding:6px 10px;font-size:11.5px;border-radius:7px}
+.btn.icon{padding:6px 8px;font-size:12px}
+.btn:focus-visible,.nav-btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.icon-btn{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;background:transparent;border:1px solid transparent;color:var(--muted)}
+.icon-btn:hover{background:var(--panel-2);color:var(--text);border-color:var(--line)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;border:1px solid transparent;white-space:nowrap}
+.badge.green{background:var(--green-soft);color:var(--green);border-color:rgba(61,220,151,.2)}
+.badge.amber{background:var(--amber-soft);color:var(--amber);border-color:rgba(240,185,90,.22)}
+.badge.red{background:var(--red-soft);color:var(--red);border-color:rgba(255,127,127,.22)}
+.badge.blue{background:var(--blue-soft);color:var(--blue);border-color:rgba(116,169,255,.22)}
+.badge.gold{background:var(--gold-soft);color:var(--gold);border-color:rgba(201,171,115,.25)}
+.badge.muted{background:rgba(255,255,255,.05);color:var(--muted);border-color:var(--line)}
+.badge.violet{background:var(--violet-soft);color:var(--violet);border-color:rgba(183,156,255,.22)}
+.badge.teal{background:var(--teal-soft);color:var(--teal);border-color:rgba(79,209,197,.22)}
+.panel{background:linear-gradient(165deg,rgba(21,34,56,.86),rgba(16,27,45,.92));border:1px solid var(--line-soft);border-radius:var(--radius);box-shadow:var(--shadow);min-width:0}
+.panel-head{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line-soft)}
+.panel-head h2{font-size:13px;margin:0;font-weight:650;letter-spacing:.01em}
+.panel-head p{font-size:11px;color:var(--muted);margin:2px 0 0}
+.panel-head .right{margin-left:auto;display:flex;gap:7px;align-items:center}
+.panel-body{padding:18px}
+.grid{display:grid;gap:16px}
+.grid>*{min-width:0}
+.split>*{min-width:0}
+.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.split{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr);gap:16px}
+.kpi{padding:17px 18px;position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;inset:auto -20px -40px auto;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(201,171,115,.09),transparent 70%)}
+.kpi .k-label{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted-2);font-weight:700}
+.kpi .k-value{font-size:25px;font-weight:700;letter-spacing:-.01em;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.kpi .k-foot{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.kpi .k-icon{position:absolute;right:15px;top:15px;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.04);border:1px solid var(--line-soft);color:var(--gold)}
+.kpi .k-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7}
+.up{color:var(--green)}.down{color:var(--red)}
+.money{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:11px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);font-weight:700;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:rgba(255,255,255,.022)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td .p-name{font-weight:600;color:var(--text)}
+td .p-code{font-size:10px;color:var(--muted-2);margin-top:1px}
+.empty{padding:34px 18px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--text);margin-bottom:4px}
+.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line-soft)}
+.toolbar .grow{flex:1}
+.input{background:#0b1524;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 11px;font-size:12.5px;min-width:0}
+.input::placeholder{color:var(--muted-2)}
+.input:focus{border-color:var(--gold-2);outline:none;box-shadow:0 0 0 3px rgba(201,171,115,.1)}
+select.input{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 15px) 50%,calc(100% - 10px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:30px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.field .input{width:100%}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.form-grid .span2{grid-column:span 2}
+.hint{font-size:11px;color:var(--muted-2);margin:0}
+.err{font-size:11.5px;color:var(--red);margin:8px 0 0;display:none}
+.err.show{display:block}
+@media(max-width:1050px){.cols-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1024px){
+  .sidebar{position:fixed;left:-270px;transition:.22s;box-shadow:0 0 60px rgba(0,0,0,.6)}
+  .sidebar.open{left:0}
+  .menu-btn{display:grid!important}
+}
+@media(max-width:860px){.split,.cols-2{grid-template-columns:1fr}}
+@media(max-width:720px){
+  .topbar{padding:12px 16px}
+  .topbar p{display:none}
+  .top-actions .hide-sm{display:none}
+  .view{padding:16px 14px 40px}
+  .cols-4,.cols-3,.cols-2{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .form-grid .span2{grid-column:auto}
+  .kpi .k-value{font-size:22px}
+}
+/* ---------- chart ---------- */
+.chart{width:100%;height:210px;display:flex;align-items:flex-end;gap:14px;padding:8px 4px 0}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end;min-width:0}
+.chart-bars{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:150px;width:100%}
+.chart-bar{width:52%;max-width:26px;border-radius:4px 4px 2px 2px;min-height:2px;background:linear-gradient(180deg,#d8bf8c,#a07d3f);transition:height .3s}
+.chart-bar.late{background:linear-gradient(180deg,#ff8d8d,#a84a4a)}
+.chart-label{font-size:10px;color:var(--muted-2);white-space:nowrap}
+.legend{display:flex;gap:14px;font-size:10.5px;color:var(--muted);align-items:center}
+.legend i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:5px}
+.legend .s{background:linear-gradient(180deg,#d8bf8c,#a07d3f)}
+.legend .l{background:linear-gradient(180deg,#ff8d8d,#a84a4a)}
+/* ---------- pipeline ---------- */
+.pipeline{display:flex;height:14px;border-radius:20px;overflow:hidden;background:rgba(255,255,255,.05);margin:6px 0 14px}
+.pipeline i{display:block;height:100%;min-width:0}
+.pipeline-legend{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px}
+.pipeline-legend .pl{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted)}
+.pipeline-legend .pl b{margin-left:auto;color:var(--text);font-size:11.5px}
+.pipeline-legend .sw{width:7px;height:7px;border-radius:2px;flex:0 0 7px}
+/* ---------- kanban ---------- */
+.kanban{display:grid;grid-template-columns:repeat(6,minmax(215px,1fr));gap:12px;overflow-x:auto;padding-bottom:8px}
+.kcol{background:rgba(255,255,255,.018);border:1px solid var(--line-soft);border-radius:11px;padding:10px;min-height:300px}
+.kcol-head{display:flex;align-items:center;gap:7px;padding:2px 2px 9px;border-bottom:1px solid var(--line-soft);margin-bottom:9px}
+.kcol-head b{font-size:11.5px;font-weight:650}
+.kcol-head .count{margin-left:auto;font-size:10px;font-weight:700;color:var(--muted);background:rgba(255,255,255,.05);padding:1px 6px;border-radius:20px}
+.kcol-head .sw{width:6px;height:6px;border-radius:2px}
+.kcard{border:1px solid var(--line);border-radius:9px;background:linear-gradient(165deg,#152238,#111c2e);padding:10px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.kcard:hover{border-color:#33507a;transform:translateY(-1px)}
+.kcard .no{font-size:9.5px;font-weight:800;letter-spacing:.08em;color:var(--gold);display:flex;justify-content:space-between;gap:6px}
+.kcard .cust{font-size:12px;font-weight:650;margin-top:4px;line-height:1.3}
+.kcard .prod{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.35}
+.kcard .meta{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:8px;padding-top:7px;border-top:1px solid var(--line-soft);font-size:9.5px;color:var(--muted-2)}
+.kcard .meta .due.late{color:var(--red);font-weight:700}
+.kcard .adv{width:100%;margin-top:7px;padding:5px 7px;border-radius:6px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-size:10px;font-weight:650}
+.kcard .adv:hover{background:var(--gold-soft);border-color:rgba(201,171,115,.3);color:var(--gold)}
+/* ---------- misc ---------- */
+.list-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.list-row:last-child{border-bottom:0}
+.list-dot{width:28px;height:28px;flex:0 0 28px;border-radius:8px;display:grid;place-items:center;font-size:11px;font-weight:700}
+.list-main{min-width:0;flex:1}
+.list-main b{display:block;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-main span{font-size:10.5px;color:var(--muted)}
+.list-amt{font-size:12px;font-weight:650;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bar-row{display:grid;grid-template-columns:1fr auto;gap:5px 10px;padding:8px 0;border-bottom:1px solid var(--line-soft)}
+.bar-row:last-child{border-bottom:0}
+.bar-row .n{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-row .v{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar-track{grid-column:1/-1;height:5px;border-radius:20px;background:rgba(255,255,255,.05);overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#a07d3f,#d8bf8c)}
+.timeline{list-style:none;margin:0;padding:0;position:relative}
+.timeline::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:1px;background:var(--line)}
+.timeline li{position:relative;padding:0 0 12px 26px;font-size:11.5px}
+.timeline li:last-child{padding-bottom:0}
+.timeline .tdot{position:absolute;left:3px;top:3px;width:11px;height:11px;border-radius:50%;background:var(--panel-2);border:2px solid var(--muted-2)}
+.timeline li.done .tdot{background:var(--gold);border-color:var(--gold)}
+.timeline li.current .tdot{background:var(--green);border-color:var(--green);box-shadow:0 0 0 4px rgba(61,220,151,.1)}
+.timeline b{display:block;font-size:11.5px;color:var(--text)}
+.timeline span{font-size:10px;color:var(--muted-2)}
+/* ---------- modal / toast ---------- */
+#modalRoot{position:fixed;inset:0;z-index:100;display:none}
+#modalRoot.open{display:block}
+.modal-backdrop{position:absolute;inset:0;background:rgba(2,6,12,.72);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px 30px;overflow-y:auto}
+.modal{width:100%;max-width:540px;background:linear-gradient(170deg,#162338,#0f1a2b);border:1px solid #2a3d5a;border-radius:16px;box-shadow:0 40px 100px -20px #000;animation:pop .18s ease-out}
+.modal.wide{max-width:760px}
+@keyframes pop{from{transform:translateY(8px);opacity:.6}to{transform:none;opacity:1}}
+.modal-head{display:flex;align-items:center;gap:12px;padding:17px 19px;border-bottom:1px solid var(--line)}
+.modal-head h3{font-size:15px;margin:0;font-weight:650}
+.modal-body{padding:19px}
+.modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 19px;border-top:1px solid var(--line)}
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:#1b2b44;border:1px solid #31496c;color:var(--text);padding:10px 17px;border-radius:9px;font-size:12.5px;box-shadow:0 20px 50px -15px #000;opacity:0;pointer-events:none;transition:.2s;z-index:200;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+/* ---------- print ---------- */
+.print-head{display:none}
+@media print{
+  @page{size:A4;margin:14mm}
+  body{background:#fff;color:#111}
+  .sidebar,.topbar,#toast,.no-print{display:none!important}
+  .app{display:block}
+  .view{padding:0;max-width:none}
+  .panel{background:#fff;border:1px solid #ddd;box-shadow:none;border-radius:0;break-inside:avoid}
+  .panel-head,td,th{border-color:#ddd}
+  .chart{height:180px}
+  .bar-row,.list-row,tr{break-inside:avoid}
+  th{color:#555}
+  .kpi .k-value,td .p-name,.kpi .k-label{color:#111}
+  .muted,.kpi .k-foot,.panel-head p{color:#555}
+  .badge{border:1px solid #bbb;color:#111!important;background:#fff!important}
+  .print-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:14px}
+  .print-head h1{font-size:20px;margin:0}
+  .print-head p{margin:2px 0 0;font-size:11px;color:#555}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">Z</div>
+      <div><div class="brand-name">ZEROTH</div><div class="brand-sub">Digital Systems</div></div>
+    </div>
+    <div class="workspace">
+      <div class="ws-label">Live demo workspace</div>
+      <div class="ws-name">Kovai Precision Components</div>
+      <div class="ws-meta">Coimbatore · Job-shop manufacturer</div>
+    </div>
+    <nav class="nav" aria-label="Main">
+      <div class="nav-label">Operations</div>
+      <button class="nav-btn" data-view="overview" onclick="go('overview')"><span class="ico"></span>Overview</button>
+      <button class="nav-btn" data-view="orders" onclick="go('orders')"><span class="ico"></span>Orders <span class="nav-count" id="overdueCount"></span></button>
+      <button class="nav-btn" data-view="board" onclick="go('board')"><span class="ico"></span>Production board</button>
+      <button class="nav-btn" data-view="materials" onclick="go('materials')"><span class="ico"></span>Materials <span class="nav-count" id="shortageCount"></span></button>
+      <button class="nav-btn" data-view="dispatch" onclick="go('dispatch')"><span class="ico"></span>Dispatch</button>
+      <div class="nav-label">Insights</div>
+      <button class="nav-btn" data-view="reports" onclick="go('reports')"><span class="ico"></span>Weekly report</button>
+    </nav>
+    <div class="side-foot">
+      <button class="help-card" onclick="demoGuide()">
+        <span class="dot"></span>
+        <span><b>Demo guide</b><span>5-step script for a factory operations call.</span></span>
+      </button>
+      <div class="side-note">Fictional sample data.<br>No real customer information.<br><br>Built by <a href="index.html" style="color:var(--gold);text-decoration:underline;text-underline-offset:2px">Zeroth Digital Systems</a><br><a href="zeroth-inventory-lite.html" style="color:var(--gold);text-decoration:underline;text-underline-offset:2px">Inventory demo →</a></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" onclick="toggleSidebar()" aria-label="Open navigation">☰</button>
+      <div><h1 id="pageTitle">Overview</h1><p id="pageSub">Factory operations at a glance</p></div>
+      <div class="top-actions">
+        <span class="demo-pill hide-sm">DEMO</span>
+        <button class="btn ghost sm hide-sm" onclick="demoGuide()">Demo guide</button>
+        <button class="btn ghost sm hide-sm" onclick="resetDemo()">Reset data</button>
+        <button class="btn primary sm" onclick="openOrder()">+ New order</button>
+      </div>
+    </header>
+    <main class="view" id="view"></main>
+  </div>
+</div>
+<div id="modalRoot"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+/* ============================================================
+   Zeroth Factory Operations — fictional demo data
+   Workspace: Kovai Precision Components, Coimbatore
+   ============================================================ */
+const KEY = "zeroth.factoryops.v1";
+const BRAND = { name:"Kovai Precision Components", city:"Coimbatore", currency:"₹" };
+
+const STAGES = [
+  { id:"confirmed", label:"Confirmed",         short:"Confirmed", color:"#74a9ff", badge:"blue"   },
+  { id:"material",  label:"Material issued",   short:"Material",  color:"#4fd1c5", badge:"teal"   },
+  { id:"machining", label:"Machining",         short:"Machining", color:"#c9ab73", badge:"gold"   },
+  { id:"assembly",  label:"Assembly",          short:"Assembly",  color:"#b79cff", badge:"violet" },
+  { id:"qc",        label:"Quality check",     short:"QC",        color:"#f0b95a", badge:"amber"  },
+  { id:"ready",     label:"Ready to dispatch", short:"Ready",     color:"#3ddc97", badge:"green"  }
+];
+const FLOW = STAGES.map(s => s.id).concat(["dispatched"]);
+const stageIndex = id => FLOW.indexOf(id);
+const stageMeta  = id => STAGES.find(s => s.id === id) || {
+  id,
+  label: id === "dispatched" ? "Dispatched" : id === "cancelled" ? "Cancelled" : id,
+  short: id === "dispatched" ? "Dispatched" : id === "cancelled" ? "Cancelled" : id,
+  color:"#92a4bd",
+  badge:"muted"
+};
+
+const PRODUCTS = [
+  { id:"FC-101", name:"Precision Shaft 20 mm",     price:1250, process:"Turning · grinding" },
+  { id:"FC-102", name:"Bearing Housing 6204",      price:1850, process:"Machining · assembly" },
+  { id:"FC-103", name:"CNC Mounting Bracket",      price:780,  process:"Milling · finishing" },
+  { id:"FC-104", name:"Gear Blank 40T",            price:2400, process:"Hobbing · deburring" },
+  { id:"FC-105", name:"Pump Adapter Plate",        price:1650, process:"Milling · assembly" }
+];
+
+/* Bill of materials: quantity of each raw material per finished unit */
+const BOMS = {
+  "FC-101": [ { materialId:"RM-01", qty:2.4 }, { materialId:"RM-06", qty:0.1 } ],
+  "FC-102": [ { materialId:"RM-03", qty:1 },   { materialId:"RM-04", qty:1 }, { materialId:"RM-05", qty:4 } ],
+  "FC-103": [ { materialId:"RM-02", qty:0.9 }, { materialId:"RM-05", qty:2 }, { materialId:"RM-07", qty:0.05 } ],
+  "FC-104": [ { materialId:"RM-01", qty:3.1 }, { materialId:"RM-06", qty:0.15 } ],
+  "FC-105": [ { materialId:"RM-02", qty:1.6 }, { materialId:"RM-04", qty:2 }, { materialId:"RM-05", qty:6 } ]
+};
+
+const CUSTOMERS = ["Anand Pumps","Lakshmi Engineering","Precision Auto Components","Sri Balaji Motors","Kongu Fabricators","VKS Hydraulics"];
+
+function seedMaterials(){
+  return [
+    { id:"RM-01", name:"Mild Steel Round Bar 20 mm", unit:"kg",  stock:340, reorder:120, rate:78,  supplier:"Kumar Steel Traders" },
+    { id:"RM-02", name:"Aluminium Billet 6061",      unit:"kg",  stock:96,  reorder:60,  rate:285, supplier:"Chennai Metals" },
+    { id:"RM-03", name:"Cast Iron Blank FG-200",     unit:"pcs", stock:54,  reorder:30,  rate:410, supplier:"Coimbatore Castings" },
+    { id:"RM-04", name:"Copper Bush 16 mm",          unit:"pcs", stock:18,  reorder:40,  rate:96,  supplier:"Precision Tools" },
+    { id:"RM-05", name:"Hex Bolt M10×40",            unit:"pcs", stock:620, reorder:300, rate:4,   supplier:"Sri Venkatesh Fasteners" },
+    { id:"RM-06", name:"Cutting Oil",                unit:"ltr", stock:42,  reorder:25,  rate:210, supplier:"Precision Tools" },
+    { id:"RM-07", name:"Paint — Charcoal",           unit:"ltr", stock:22,  reorder:15,  rate:340, supplier:"Colour House" }
+  ];
+}
+
+function seedDb(){
+  const orders = [];
+  const consumption = [];
+
+  function add(id, customer, productId, qty, rate, orderedAgo, dueAgo, stage, extra){
+    extra = extra || {};
+    const ordered = dateAgo(orderedAgo);
+    const due = dateAgo(dueAgo);
+    const o = {
+      id, customer, productId, qty, rate, ordered, due, stage,
+      priority: extra.priority || "normal",
+      notes: extra.notes || "",
+      history: [],
+      dispatch: null
+    };
+    if(stage === "dispatched"){
+      o.dispatch = { date:dateAgo(extra.dispatchAgo), vehicle:extra.vehicle, docket:extra.docket, qty:qty };
+    }
+    const endDate0 = o.dispatch ? o.dispatch.date : addDays(today(), -(Number(String(id).replace(/\D/g,"")) % 3));
+    const endDate = endDate0 < ordered ? ordered : endDate0;
+    const idx = stage === "dispatched" ? FLOW.length - 1 : stageIndex(stage);
+    for(let i=0; i<=idx; i++){
+      let at = ordered;
+      if(i > 0){
+        if(o.dispatch && i === idx){
+          at = o.dispatch.date;
+        } else {
+          const span = Math.max(1, daysBetween(ordered, endDate));
+          at = addDays(ordered, Math.round(span * i / idx));
+          if(at > endDate) at = endDate;
+        }
+      }
+      o.history.push({ stage:FLOW[i], date:at });
+    }
+    if(idx >= 1){
+      const issued = o.history[1].date;
+      (BOMS[productId] || []).forEach(b => {
+        consumption.push({ id:uid("c"), orderId:id, materialId:b.materialId, qty:round2(b.qty * qty), date:issued });
+      });
+    }
+    orders.push(o);
+  }
+
+  /* -------- dispatched (older) -------- */
+  add("ORD-1039","Kongu Fabricators","FC-103",60,780,26,12,"dispatched",{dispatchAgo:11,vehicle:"TN 38 AB 4412",docket:"LR-8841"});
+  add("ORD-1040","Anand Pumps","FC-101",30,1250,22,9,"dispatched",{dispatchAgo:9,vehicle:"TN 38 CD 7781",docket:"LR-8902"});
+  add("ORD-1041","Lakshmi Engineering","FC-104",18,2400,20,6,"dispatched",{dispatchAgo:5,vehicle:"TN 33 KL 2094",docket:"LR-8955"});
+  add("ORD-1042","Precision Auto Components","FC-102",25,1850,19,4,"dispatched",{dispatchAgo:3,vehicle:"TN 38 MN 6620",docket:"LR-8977"});
+  add("ORD-1043","VKS Hydraulics","FC-105",20,1650,17,2,"dispatched",{dispatchAgo:2,vehicle:"TN 37 PQ 1188",docket:"LR-8990"});
+  add("ORD-1044","Sri Balaji Motors","FC-103",45,780,15,1,"dispatched",{dispatchAgo:1,vehicle:"TN 38 RS 5540",docket:"LR-9012"});
+  add("ORD-1045","Anand Pumps","FC-101",12,1250,12,0,"dispatched",{dispatchAgo:0,vehicle:"TN 38 CD 7781",docket:"LR-9028"});
+
+  /* -------- active -------- */
+  add("ORD-1046","Lakshmi Engineering","FC-104",25,2400,16,2,"machining",{priority:"high",notes:"Customer line stoppage — expedite."});
+  add("ORD-1047","Anand Pumps","FC-101",50,1250,10,-2,"assembly",{priority:"high"});
+  add("ORD-1048","Precision Auto Components","FC-102",30,1850,9,-4,"confirmed",{priority:"high",notes:"Waiting on copper bush stock."});
+  add("ORD-1049","Kongu Fabricators","FC-103",80,780,8,-5,"machining");
+  add("ORD-1050","VKS Hydraulics","FC-105",15,1650,14,1,"qc",{priority:"high",notes:"Final inspection pending customer witness."});
+  add("ORD-1051","Sri Balaji Motors","FC-101",20,1250,6,-6,"material");
+  add("ORD-1052","Anand Pumps","FC-104",10,2400,5,-7,"confirmed");
+  add("ORD-1053","Lakshmi Engineering","FC-102",12,1850,5,-8,"material");
+  add("ORD-1054","Precision Auto Components","FC-103",35,780,4,-9,"ready");
+  add("ORD-1055","Kongu Fabricators","FC-105",25,1650,3,-10,"machining");
+  add("ORD-1056","VKS Hydraulics","FC-102",18,1850,2,-11,"confirmed",{notes:"Stock is just enough — issue will clear copper bushes."});
+  add("ORD-1057","Sri Balaji Motors","FC-101",40,1250,1,-12,"confirmed");
+  add("ORD-1058","Anand Pumps","FC-103",70,780,1,-13,"ready");
+  add("ORD-1059","Lakshmi Engineering","FC-104",16,2400,0,-14,"confirmed");
+  add("ORD-1060","Precision Auto Components","FC-105",30,1650,0,-15,"confirmed",{priority:"high",notes:"Needs 60 copper bushes — currently short."});
+
+  return { version:1, materials:seedMaterials(), orders, consumption, seq:1061 };
+}
+
+/* ---------- storage ---------- */
+let DB;
+try {
+  const raw = localStorage.getItem(KEY);
+  DB = raw ? JSON.parse(raw) : seedDb();
+} catch(e){ DB = seedDb(); }
+if(!DB || DB.version !== 1 || !Array.isArray(DB.orders)) DB = seedDb();
+
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
+
+/* ---------- helpers ---------- */
+function uid(prefix){ return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function n(v){ const x = Number(v); return isFinite(x) ? x : 0; }
+function round2(v){ return Math.round(n(v)*100)/100; }
+function money(v){ return BRAND.currency + new Intl.NumberFormat("en-IN",{maximumFractionDigits:0}).format(n(v)); }
+function qty(v){ return new Intl.NumberFormat("en-IN",{maximumFractionDigits:2}).format(n(v)); }
+function iso(d){ const p = x => String(x).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
+function today(){ return iso(new Date()); }
+function addDays(dateStr, days){ const d = new Date(String(dateStr)+"T00:00:00"); d.setDate(d.getDate()+days); return iso(d); }
+function dateAgo(days){ const d = new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()-days); return iso(d); }
+function daysBetween(a,b){ return Math.round((new Date(String(b)+"T00:00:00") - new Date(String(a)+"T00:00:00"))/86400000); }
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function dateLabel(s){
+  const d = new Date(String(s)+"T00:00:00");
+  if(isNaN(d)) return s;
+  return d.getDate()+" "+MONTHS[d.getMonth()];
+}
+function dateLong(s){
+  const d = new Date(String(s)+"T00:00:00");
+  if(isNaN(d)) return s;
+  return DAYS[d.getDay()]+", "+d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear();
+}
+function weekWindow(){
+  const end = today(), start = addDays(end,-6), days = [];
+  for(let i=0;i<7;i++) days.push(addDays(start,i));
+  return { start, end, days };
+}
+
+const materialById = id => DB.materials.find(m => m.id === id);
+const productById  = id => PRODUCTS.find(p => p.id === id);
+const orderById    = id => DB.orders.find(o => o.id === id);
+const isActive     = o => o.stage !== "dispatched" && o.stage !== "cancelled";
+const isOverdue    = o => isActive(o) && o.due < today();
+function orderValue(o){ return n(o.qty) * n(o.rate); }
+function bomNeed(o){
+  return (BOMS[o.productId] || []).map(b => {
+    const material = materialById(b.materialId);
+    return { materialId:b.materialId, material, required:round2(b.qty * n(o.qty)) };
+  });
+}
+function materialShort(o){
+  return bomNeed(o).filter(x => x.material && n(x.material.stock) < x.required);
+}
+function shortageMaterials(){ return DB.materials.filter(m => n(m.stock) <= n(m.reorder)); }
+function ordersBlocked(){ return DB.orders.filter(o => o.stage === "confirmed" && materialShort(o).length > 0); }
+function stageBadge(o){
+  if(o.stage === "dispatched") return { label:"Dispatched", badge:"muted" };
+  if(o.stage === "cancelled")  return { label:"Cancelled",  badge:"red" };
+  return stageMeta(o.stage);
+}
+function priorityBadge(p){
+  if(p === "high") return `<span class="badge red">High</span>`;
+  if(p === "low")  return `<span class="badge muted">Low</span>`;
+  return `<span class="badge muted">Normal</span>`;
+}
+
+const ICONS = {
+  overview:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  orders:'<svg viewBox="0 0 24 24"><path d="M9 3h6l1 3h3v15H5V6h3l1-3z"/><path d="M9 11h6M9 15h6M9 19h4"/></svg>',
+  board:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="14" rx="1.5"/></svg>',
+  materials:'<svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
+  dispatch:'<svg viewBox="0 0 24 24"><path d="M1 4h13v12H1z"/><path d="M14 8h4l3 4v4h-7z"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg>',
+  reports:'<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 17v-4M12 17v-6M16 17v-3"/></svg>'
+};
+const VIEW_META = {
+  overview:["Overview","Factory operations at a glance"],
+  orders:["Orders","Customer orders, due dates and order value"],
+  board:["Production board","Live work-in-progress by stage"],
+  materials:["Materials","Raw material stock, reorder levels and BOM"],
+  dispatch:["Dispatch","Ready orders and the dispatch register"],
+  reports:["Weekly report","Output, on-time delivery and material use"]
+};
+
+/* ============================================================
+   Shell, navigation and overview
+   ============================================================ */
+const state = { view:"overview", orderSearch:"", orderStage:"all", orderStatus:"active", matSearch:"", matFilter:"all" };
+
+function render(){
+  const meta = VIEW_META[state.view] || VIEW_META.overview;
+  document.getElementById("pageTitle").textContent = meta[0];
+  document.getElementById("pageSub").textContent = meta[1];
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === state.view));
+
+  const overdue = DB.orders.filter(isOverdue).length;
+  const oc = document.getElementById("overdueCount");
+  oc.textContent = overdue ? String(overdue) : "";
+  oc.style.display = overdue ? "" : "none";
+
+  const shorts = shortageMaterials().length;
+  const sc = document.getElementById("shortageCount");
+  sc.textContent = shorts ? String(shorts) : "";
+  sc.style.display = shorts ? "" : "none";
+
+  const views = { overview:renderOverview, orders:renderOrders, board:renderBoard, materials:renderMaterials, dispatch:renderDispatch, reports:renderReports };
+  document.getElementById("view").innerHTML = (views[state.view] || renderOverview)();
+}
+function go(view){
+  state.view = view;
+  if(location.hash !== "#"+view) history.replaceState(null,"","#"+view);
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+  document.getElementById("sidebar").classList.remove("open");
+}
+function toggleSidebar(){ document.getElementById("sidebar").classList.toggle("open"); }
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove("show"), 2800);
+}
+
+/* ---------- modal ---------- */
+function openModal(html, wide){
+  const root = document.getElementById("modalRoot");
+  root.innerHTML = `<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal${wide?" wide":""}" role="dialog" aria-modal="true">${html}</div></div>`;
+  root.classList.add("open");
+  document.body.classList.add("modal-open");
+}
+function closeModal(){
+  const root = document.getElementById("modalRoot");
+  root.classList.remove("open");
+  root.innerHTML = "";
+  document.body.classList.remove("modal-open");
+}
+
+/* ---------- overview ---------- */
+function kpiCard(label, value, foot, icon, tone){
+  return `<div class="panel kpi">
+    <div class="k-label">${label}</div>
+    <div class="k-value"${tone?` style="color:${tone}"`:""}>${value}</div>
+    <div class="k-foot">${foot}</div>
+    <div class="k-icon">${icon}</div>
+  </div>`;
+}
+function renderOverview(){
+  const active = DB.orders.filter(isActive);
+  const overdue = active.filter(isOverdue).sort((a,b)=>a.due.localeCompare(b.due));
+  const blocked = ordersBlocked();
+  const shorts = shortageMaterials();
+  const week = weekWindow();
+  const dispatchedWeek = DB.orders.filter(o => o.stage==="dispatched" && o.dispatch && o.dispatch.date>=week.start && o.dispatch.date<=week.end);
+  const weekValue = dispatchedWeek.reduce((t,o)=>t+orderValue(o),0);
+  const weekUnits = dispatchedWeek.reduce((t,o)=>t+n(o.qty),0);
+  const dueSoon = active.filter(o => o.due >= today() && o.due <= addDays(today(),7));
+  const activeValue = active.reduce((t,o)=>t+orderValue(o),0);
+  const activeUnits = active.reduce((t,o)=>t+n(o.qty),0);
+  const overdueValue = overdue.reduce((t,o)=>t+orderValue(o),0);
+
+  const stageRows = STAGES.map(s => {
+    const list = active.filter(o => o.stage===s.id);
+    return { ...s, count:list.length, units:list.reduce((t,o)=>t+n(o.qty),0), value:list.reduce((t,o)=>t+orderValue(o),0) };
+  });
+  const pipeline = stageRows.filter(s=>s.count).map(s =>
+    `<i style="width:${(s.count/Math.max(1,active.length))*100}%;background:${s.color}" title="${esc(s.label)} · ${s.count} order${s.count===1?"":"s"}"></i>`
+  ).join("") || `<i style="width:100%;background:#233650"></i>`;
+  const pipelineLegend = stageRows.map(s => `
+    <div class="pl"><span class="sw" style="background:${s.color}"></span><span>${esc(s.label)}</span><b>${s.count}</b></div>`).join("");
+  const nextUp = active.slice().sort((a,b)=>String(a.due).localeCompare(String(b.due))).slice(0,3);
+  const nextUpHtml = nextUp.map(o => {
+    const late = daysBetween(o.due, today());
+    return `<div class="list-row" style="padding:7px 0">
+      <div class="list-main"><b>${o.id} · ${esc(o.customer)}</b><span>${qty(o.qty)} × ${esc(productById(o.productId).name)}</span></div>
+      <span class="badge ${late>0?"red":late===0?"amber":"muted"}">${late>0?late+"d late":late===0?"Due today":"Due "+dateLabel(o.due)}</span>
+    </div>`;
+  }).join("");
+
+  const weeks = [];
+  for(let i=5;i>=0;i--){
+    const end = addDays(today(), -i*7), start = addDays(end,-6);
+    const rows = DB.orders.filter(o => o.stage==="dispatched" && o.dispatch && o.dispatch.date>=start && o.dispatch.date<=end);
+    weeks.push({ start, end, value:rows.reduce((t,o)=>t+orderValue(o),0), count:rows.length });
+  }
+  const wmax = Math.max(1, ...weeks.map(w=>w.value));
+  const weekChart = weeks.map(w => `
+    <div class="chart-col" title="Week of ${dateLabel(w.start)} · ${w.count} orders · ${money(w.value)}">
+      <div class="chart-bars"><div class="chart-bar" style="height:${Math.max(2,(w.value/wmax)*100)}%"></div></div>
+      <div class="chart-label">${dateLabel(w.start)}</div>
+    </div>`).join("");
+
+  const attention = [];
+  overdue.forEach(o => attention.push({ o, kind:"overdue" }));
+  blocked.filter(o => !overdue.some(x=>x.id===o.id)).forEach(o => attention.push({ o, kind:"blocked" }));
+  const attentionHtml = attention.length ? attention.slice(0,5).map(({o,kind}) => {
+    const late = daysBetween(o.due, today());
+    return `<div class="list-row">
+      <div class="list-dot" style="background:${kind==="overdue"?"var(--red-soft)":"var(--amber-soft)"};color:${kind==="overdue"?"var(--red)":"var(--amber)"}">${kind==="overdue"?"!":"M"}</div>
+      <div class="list-main"><b>${o.id} · ${esc(o.customer)}</b><span>${qty(o.qty)} × ${esc(productById(o.productId).name)} · due ${dateLabel(o.due)}</span></div>
+      <span class="badge ${kind==="overdue"?"red":"amber"}">${kind==="overdue"?late+"d late":"Material short"}</span>
+      <button class="btn sm" onclick="openOrder('${o.id}')">Open</button>
+    </div>`;
+  }).join("") : `<div class="empty"><b>Nothing urgent</b>No overdue orders and no material-blocked orders.</div>`;
+
+  const since = addDays(today(),-30), custMap = {};
+  DB.orders.filter(o => o.stage==="dispatched" && o.dispatch && o.dispatch.date>=since)
+    .forEach(o => { custMap[o.customer] = (custMap[o.customer]||0) + orderValue(o); });
+  const top = Object.entries(custMap).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const topMax = Math.max(1, ...top.map(t=>t[1]));
+  const topHtml = top.length ? top.map(([name,val]) => `
+    <div class="bar-row"><div class="n">${esc(name)}</div><div class="v">${money(val)}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.max(3,(val/topMax)*100)}%"></div></div></div>`).join("")
+    : `<div class="empty"><b>No dispatches yet</b>Dispatch an order to see customer value.</div>`;
+
+  const moves = [];
+  DB.orders.forEach(o => o.history.forEach(h => { if(h.stage !== "confirmed") moves.push({ o, h }); }));
+  moves.sort((a,b)=> String(b.h.date).localeCompare(String(a.h.date)));
+  const recentHtml = moves.length ? `<ul class="timeline">${moves.slice(0,6).map(({o,h}) => `
+    <li class="done"><span class="tdot"></span><b>${o.id} · ${esc(stageMeta(h.stage).label)}</b><span>${esc(o.customer)} · ${dateLabel(h.date)}</span></li>`).join("")}</ul>`
+    : `<div class="empty"><b>No movement yet</b>Issue material or move an order on the production board.</div>`;
+
+  const shortHtml = shorts.length ? shorts.slice(0,5).map(m => `
+    <div class="list-row">
+      <div class="list-dot" style="background:var(--amber-soft);color:var(--amber)">!</div>
+      <div class="list-main"><b>${esc(m.name)}</b><span>${qty(m.stock)} ${esc(m.unit)} left · reorder at ${qty(m.reorder)}</span></div>
+      <button class="btn sm" onclick="openReceive('${m.id}')">Receive</button>
+    </div>`).join("") : `<div class="empty"><b>All materials healthy</b>No item is at or below its reorder level.</div>`;
+
+  return `
+  <div class="grid cols-4" style="margin-bottom:16px">
+    ${kpiCard("Open orders", active.length, `${qty(activeUnits)} units · ${money(activeValue)} in progress`, ICONS.orders)}
+    ${kpiCard("Overdue", overdue.length, overdue.length ? `${money(overdueValue)} at risk` : `<span class="badge green">On track</span>`, ICONS.board, overdue.length?"var(--red)":"var(--green)")}
+    ${kpiCard("Due next 7 days", dueSoon.length, `${qty(dueSoon.reduce((t,o)=>t+n(o.qty),0))} units to finish`, ICONS.dispatch)}
+    ${kpiCard("Dispatched this week", money(weekValue), `${dispatchedWeek.length} orders · ${qty(weekUnits)} units`, ICONS.reports)}
+  </div>
+
+  <div class="split" style="margin-bottom:16px">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Production pipeline</h2><p>Where every open order sits right now</p></div><div class="right"><button class="btn sm" onclick="go('board')">Open board</button></div></div>
+      <div class="panel-body">
+        <div class="pipeline">${pipeline}</div>
+        <div class="pipeline-legend">${pipelineLegend}</div>
+        <div style="border-top:1px solid var(--line-soft);margin-top:14px;padding-top:8px">
+          <div class="small muted" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:2px 0 4px">Next to finish</div>
+          ${nextUpHtml}
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Dispatch value</h2><p>Last 6 weeks</p></div><div class="right"><span class="badge gold">${money(weekValue)} this week</span></div></div>
+      <div class="panel-body">
+        <div class="chart">${weekChart}</div>
+        <div class="legend"><span><i class="s"></i>Dispatched value</span><span class="muted">Week ending today</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Needs attention</h2><p>Overdue orders and material blocks</p></div><div class="right">${attention.length?`<span class="badge red">${attention.length}</span>`:`<span class="badge green">Clear</span>`}</div></div>
+      <div class="panel-body" style="padding-top:4px;padding-bottom:4px">${attentionHtml}</div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Top customers</h2><p>Dispatched value · last 30 days</p></div><div class="right"><button class="btn sm ghost" onclick="go('reports')">Report</button></div></div>
+      <div class="panel-body">${topHtml}</div>
+    </div>
+  </div>
+
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Material alerts</h2><p>${shorts.length} item${shorts.length===1?"":"s"} at or below reorder</p></div><div class="right"><button class="btn sm" onclick="go('materials')">Materials</button></div></div>
+      <div class="panel-body" style="padding-top:4px;padding-bottom:4px">${shortHtml}</div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Recent movement</h2><p>Latest stage updates across the shop floor</p></div><div class="right"><button class="btn sm" onclick="go('board')">Board</button></div></div>
+      <div class="panel-body">${recentHtml}</div>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   Orders
+   ============================================================ */
+function stageOptions(){
+  return `<option value="all">All stages</option>` +
+    STAGES.map(s => `<option value="${s.id}"${state.orderStage===s.id?" selected":""}>${esc(s.label)}</option>`).join("") +
+    `<option value="dispatched"${state.orderStage==="dispatched"?" selected":""}>Dispatched</option>`;
+}
+function statusOptions(){
+  return [["active","Active orders"],["dispatched","Dispatched"],["all","All orders"]]
+    .map(([v,l]) => `<option value="${v}"${state.orderStatus===v?" selected":""}>${l}</option>`).join("");
+}
+function filteredOrders(){
+  let rows = DB.orders.slice();
+  if(state.orderStatus === "active") rows = rows.filter(isActive);
+  else if(state.orderStatus === "dispatched") rows = rows.filter(o => o.stage === "dispatched");
+  if(state.orderStage !== "all") rows = rows.filter(o => o.stage === state.orderStage);
+  const q = state.orderSearch.trim().toLowerCase();
+  if(q){
+    rows = rows.filter(o => {
+      const p = productById(o.productId);
+      return [o.id, o.customer, p?p.name:"", p?p.id:""].join(" ").toLowerCase().includes(q);
+    });
+  }
+  rows.sort((a,b) => {
+    const aa = isActive(a)?0:1, bb = isActive(b)?0:1;
+    if(aa !== bb) return aa-bb;
+    if(aa === 0) return String(a.due).localeCompare(String(b.due));
+    const ad = a.dispatch?a.dispatch.date:"", bd = b.dispatch?b.dispatch.date:"";
+    return String(bd).localeCompare(String(ad));
+  });
+  return rows;
+}
+function dueCell(o){
+  if(!isActive(o)) return `<span class="muted">${dateLabel(o.due)}</span>`;
+  const late = daysBetween(o.due, today());
+  if(late > 0) return `${dateLabel(o.due)} <span class="badge red">${late}d late</span>`;
+  if(late === 0) return `${dateLabel(o.due)} <span class="badge amber">Today</span>`;
+  return `${dateLabel(o.due)} <span class="small muted">${-late}d left</span>`;
+}
+function orderRowsHtml(){
+  const rows = filteredOrders();
+  if(!rows.length){
+    return `<tr><td colspan="8"><div class="empty"><b>No orders match</b>Clear the search or change the filters.</div></td></tr>`;
+  }
+  return rows.map(o => {
+    const p = productById(o.productId) || { name:"Unknown product", id:"", process:"" };
+    const sb = stageBadge(o);
+    const blocked = o.stage === "confirmed" && materialShort(o).length > 0;
+    return `<tr onclick="openOrder('${o.id}')" style="cursor:pointer">
+      <td><div class="p-name">${o.id}</div><div class="p-code">${o.priority==="high"?"High priority":"Standard"}</div></td>
+      <td>${esc(o.customer)}</td>
+      <td><div class="p-name">${esc(p.name)}</div><div class="p-code">${p.id} · ${esc(p.process)}</div></td>
+      <td class="num">${qty(o.qty)}</td>
+      <td>${dueCell(o)}</td>
+      <td><span class="badge ${sb.badge}">${sb.label}</span>${blocked?` <span class="badge amber">Short</span>`:""}</td>
+      <td class="num">${money(orderValue(o))}</td>
+      <td><button class="btn sm" onclick="event.stopPropagation();openOrder('${o.id}')">Open</button></td>
+    </tr>`;
+  }).join("");
+}
+function orderCountLabel(){
+  const rows = filteredOrders();
+  return `${rows.length} order${rows.length===1?"":"s"} · ${money(rows.reduce((t,o)=>t+orderValue(o),0))}`;
+}
+function renderOrders(){
+  return `<div class="panel">
+    <div class="toolbar">
+      <input class="input" id="orderSearch" placeholder="Search order, customer, product…" value="${esc(state.orderSearch)}" oninput="filterOrders()" style="min-width:220px">
+      <select class="input" id="orderStage" onchange="filterOrders()">${stageOptions()}</select>
+      <select class="input" id="orderStatus" onchange="filterOrders()">${statusOptions()}</select>
+      <span class="grow"></span>
+      <span class="small muted" id="orderCount">${orderCountLabel()}</span>
+      <button class="btn sm" onclick="exportOrders()">Export CSV</button>
+      <button class="btn primary sm" onclick="openOrder()">+ New order</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Order</th><th>Customer</th><th>Product</th><th class="num">Qty</th><th>Due</th><th>Stage</th><th class="num">Value</th><th></th></tr></thead>
+        <tbody id="orderRows">${orderRowsHtml()}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+function filterOrders(){
+  state.orderSearch = document.getElementById("orderSearch").value;
+  state.orderStage = document.getElementById("orderStage").value;
+  state.orderStatus = document.getElementById("orderStatus").value;
+  document.getElementById("orderRows").innerHTML = orderRowsHtml();
+  document.getElementById("orderCount").textContent = orderCountLabel();
+}
+
+/* ---------- new order ---------- */
+function openOrder(id){
+  if(!id) return openNewOrder();
+  const o = orderById(id);
+  if(!o) return;
+  openModal(orderDetailHtml(o), true);
+}
+function openNewOrder(){
+  const due = addDays(today(), 7);
+  const opts = PRODUCTS.map(p => `<option value="${p.id}">${esc(p.name)} — ${money(p.price)}</option>`).join("");
+  openModal(`
+    <div class="modal-head"><h3>New customer order</h3><button class="icon-btn" onclick="closeModal()" aria-label="Close">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field span2"><label>Customer</label><input class="input" id="noCustomer" list="customerList" placeholder="e.g. Anand Pumps" autocomplete="off"><datalist id="customerList">${CUSTOMERS.map(c=>`<option value="${esc(c)}">`).join("")}</datalist></div>
+        <div class="field span2"><label>Product</label><select class="input" id="noProduct" onchange="syncNewRate(true)">${opts}</select></div>
+        <div class="field"><label>Quantity</label><input class="input" id="noQty" type="number" min="1" step="1" value="10" oninput="updateNewValue()"></div>
+        <div class="field"><label>Rate per unit (₹)</label><input class="input" id="noRate" type="number" min="1" step="1" value="${PRODUCTS[0].price}" oninput="updateNewValue()"></div>
+        <div class="field"><label>Due date</label><input class="input" id="noDue" type="date" value="${due}"></div>
+        <div class="field"><label>Priority</label><select class="input" id="noPriority"><option value="normal">Normal</option><option value="high">High</option><option value="low">Low</option></select></div>
+        <div class="field span2"><label>Notes (optional)</label><input class="input" id="noNotes" placeholder="Drawing revision, packing instruction…"></div>
+      </div>
+      <p class="hint" id="noValue" style="margin-top:12px">Order value: ₹0</p>
+      <p class="err" id="noErr"></p>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitNewOrder()">Create order</button></div>`);
+  updateNewValue();
+}
+function updateNewValue(){
+  const q = n(document.getElementById("noQty").value);
+  const r = n(document.getElementById("noRate").value);
+  document.getElementById("noValue").textContent = "Order value: " + money(q*r);
+}
+function syncNewRate(force){
+  const p = productById(document.getElementById("noProduct").value);
+  if(force && p) document.getElementById("noRate").value = p.price;
+  updateNewValue();
+}
+function submitNewOrder(){
+  const customer = document.getElementById("noCustomer").value.trim();
+  const productId = document.getElementById("noProduct").value;
+  const q = n(document.getElementById("noQty").value);
+  const rate = n(document.getElementById("noRate").value);
+  const due = document.getElementById("noDue").value;
+  const priority = document.getElementById("noPriority").value;
+  const notes = document.getElementById("noNotes").value.trim();
+  const err = document.getElementById("noErr");
+  const fail = msg => { err.textContent = msg; err.classList.add("show"); };
+  if(!customer) return fail("Enter the customer name.");
+  if(q <= 0) return fail("Quantity must be greater than zero.");
+  if(rate <= 0) return fail("Rate must be greater than zero.");
+  if(!due) return fail("Choose a due date.");
+  const id = "ORD-" + DB.seq;
+  DB.seq += 1;
+  DB.orders.push({ id, customer, productId, qty:q, rate, ordered:today(), due, stage:"confirmed", priority, notes, history:[{stage:"confirmed",date:today()}], dispatch:null });
+  save(); closeModal(); render();
+  toast(id + " created for " + customer);
+  openOrder(id);
+}
+
+/* ---------- order detail ---------- */
+function orderDetailHtml(o){
+  const p = productById(o.productId) || { name:"Unknown product", id:"", process:"" };
+  const sb = stageBadge(o);
+  const late = daysBetween(o.due, today());
+  const active = isActive(o);
+  const need = bomNeed(o);
+  const short = materialShort(o);
+  const issued = stageIndex(o.stage) >= 1 || o.stage === "dispatched";
+  const curIdx = o.stage === "dispatched" ? FLOW.length - 1 : stageIndex(o.stage);
+
+  const timeline = FLOW.map((sid, i) => {
+    const meta = sid === "dispatched" ? { label:"Dispatched" } : stageMeta(sid);
+    const h = [...o.history].reverse().find(x => x.stage === sid);
+    const done = o.stage === "dispatched" ? true : i < curIdx;
+    const current = o.stage !== "dispatched" && i === curIdx;
+    const note = h ? dateLabel(h.date) : current ? "In progress" : done ? "Completed" : "Pending";
+    return `<li class="${done?"done":current?"current":""}"><span class="tdot"></span><b>${esc(meta.label)}</b><span>${note}</span></li>`;
+  }).join("");
+
+  const matRows = need.map(x => {
+    const m = x.material;
+    const available = m ? n(m.stock) : 0;
+    const ok = m && available >= x.required;
+    const status = issued
+      ? `<span class="badge green">Issued</span>`
+      : ok ? `<span class="badge green">Available</span>`
+           : `<span class="badge red">Short ${qty(x.required-available)}</span>`;
+    return `<tr>
+      <td><div class="p-name">${esc(m?m.name:"Unknown material")}</div><div class="p-code">${x.materialId}</div></td>
+      <td class="num">${qty(x.required)} ${esc(m?m.unit:"")}</td>
+      <td class="num">${m?qty(m.stock):"—"}</td>
+      <td>${status}</td>
+    </tr>`;
+  }).join("");
+
+  let footer = `<button class="btn" onclick="closeModal()">Close</button>`;
+  if(active){
+    footer = `<button class="btn danger sm" style="margin-right:auto" onclick="cancelOrder('${o.id}')">Cancel order</button>` + footer;
+    if(o.stage === "ready"){
+      footer += `<button class="btn primary" onclick="closeModal();openDispatch('${o.id}')">Dispatch order</button>`;
+    } else if(o.stage === "confirmed"){
+      footer += `<button class="btn primary" onclick="advanceOrder('${o.id}')">${short.length?"Check material":"Issue material & start"}</button>`;
+    } else {
+      const next = FLOW[stageIndex(o.stage)+1];
+      footer += `<button class="btn primary" onclick="advanceOrder('${o.id}')">Move to ${esc(stageMeta(next).label)}</button>`;
+    }
+  }
+
+  const dispatchBox = o.stage === "dispatched" && o.dispatch ? `
+    <div class="panel" style="box-shadow:none;margin-bottom:16px">
+      <div class="panel-body" style="padding:12px 14px">
+        <div class="small muted" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700">Dispatched ${dateLong(o.dispatch.date)}</div>
+        <div style="margin-top:3px">${esc(o.dispatch.vehicle||"—")} · Docket ${esc(o.dispatch.docket||"—")}</div>
+      </div>
+    </div>` : "";
+
+  const warn = active && late > 0 ? `<div style="background:var(--red-soft);border:1px solid rgba(255,127,127,.22);color:var(--red);padding:9px 12px;border-radius:8px;font-size:12px;margin-bottom:14px"><b>${late} day${late===1?"":"s"} overdue.</b> Customer due date was ${dateLong(o.due)}.</div>` : "";
+  const blockWarn = active && o.stage === "confirmed" && short.length ? `<div style="background:var(--amber-soft);border:1px solid rgba(240,185,90,.22);color:var(--amber);padding:9px 12px;border-radius:8px;font-size:12px;margin-bottom:14px"><b>Material short.</b> Receive ${short.map(x=>esc(x.material.name)).join(", ")} before starting production.</div>` : "";
+
+  return `
+    <div class="modal-head">
+      <div><h3>${o.id} · ${esc(o.customer)}</h3><p class="hint">Ordered ${dateLabel(o.ordered)} · Due ${dateLabel(o.due)}</p></div>
+      <span class="badge ${sb.badge}" style="margin-left:auto">${sb.label}</span>
+      <button class="icon-btn" onclick="closeModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      ${warn}${blockWarn}
+      <div class="grid cols-3" style="gap:14px;margin-bottom:16px">
+        <div><div class="small muted" style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700">Product</div><div style="font-weight:600">${esc(p.name)}</div><div class="small muted">${p.id}</div></div>
+        <div><div class="small muted" style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700">Quantity</div><div style="font-weight:600">${qty(o.qty)} pcs</div><div class="small muted">${money(o.rate)} / unit</div></div>
+        <div><div class="small muted" style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700">Order value</div><div style="font-weight:600">${money(orderValue(o))}</div><div class="small muted">${priorityBadge(o.priority)}</div></div>
+      </div>
+      ${dispatchBox}
+      <div class="grid cols-2" style="gap:20px">
+        <div>
+          <div class="panel-head" style="padding:0 0 10px;border-bottom:1px solid var(--line-soft);margin-bottom:12px"><h2>Stage history</h2></div>
+          <ul class="timeline">${timeline}</ul>
+        </div>
+        <div>
+          <div class="panel-head" style="padding:0 0 10px;border-bottom:1px solid var(--line-soft);margin-bottom:12px"><h2>Material requirement</h2></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Material</th><th class="num">Required</th><th class="num">In stock</th><th>Status</th></tr></thead>
+            <tbody>${matRows}</tbody>
+          </table></div>
+          ${o.notes?`<p class="hint" style="margin-top:12px"><b style="color:var(--muted)">Notes:</b> ${esc(o.notes)}</p>`:""}
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">${footer}</div>`;
+}
+
+/* ---------- stage actions ---------- */
+function advanceOrder(id){
+  const o = orderById(id);
+  if(!o || !isActive(o)) return;
+  if(o.stage === "confirmed"){
+    const short = materialShort(o);
+    if(short.length){ openShortage(o, short); return; }
+    bomNeed(o).forEach(x => {
+      if(!x.material) return;
+      x.material.stock = round2(n(x.material.stock) - x.required);
+      DB.consumption.push({ id:uid("c"), orderId:o.id, materialId:x.materialId, qty:x.required, date:today() });
+    });
+    o.stage = "material";
+    o.history.push({ stage:"material", date:today() });
+    save(); render(); openOrder(id);
+    toast("Material issued for " + id + " · stock updated");
+    return;
+  }
+  if(o.stage === "ready"){ closeModal(); openDispatch(id); return; }
+  const next = FLOW[stageIndex(o.stage)+1];
+  o.stage = next;
+  o.history.push({ stage:next, date:today() });
+  save(); render(); openOrder(id);
+  toast(id + " moved to " + stageMeta(next).label);
+}
+function openShortage(o, short){
+  const rows = short.map(x => `
+    <div class="list-row">
+      <div class="list-dot" style="background:var(--red-soft);color:var(--red)">!</div>
+      <div class="list-main"><b>${esc(x.material.name)}</b><span>Need ${qty(x.required)} ${esc(x.material.unit)} · only ${qty(x.material.stock)} in stock</span></div>
+      <button class="btn sm" onclick="openReceive('${x.materialId}','${o.id}')">Receive</button>
+    </div>`).join("");
+  openModal(`
+    <div class="modal-head"><h3>Material short for ${o.id}</h3><button class="icon-btn" onclick="closeModal()" aria-label="Close">✕</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:10px">The order stays in <b>Confirmed</b> until every material is available. Receive stock, then issue material again.</p>
+      ${rows}
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="openOrder('${o.id}')">Back to order</button><button class="btn primary" onclick="closeModal();go('materials')">Open materials</button></div>`);
+}
+function cancelOrder(id){
+  const o = orderById(id);
+  if(!o || !isActive(o)) return;
+  openModal(`
+    <div class="modal-head"><h3>Cancel ${o.id}?</h3><button class="icon-btn" onclick="closeModal()" aria-label="Close">✕</button></div>
+    <div class="modal-body"><p class="hint">This removes the order from the production board. Material already issued is not returned automatically.</p></div>
+    <div class="modal-foot"><button class="btn" onclick="openOrder('${id}')">Keep order</button><button class="btn danger" onclick="doCancel('${id}')">Cancel order</button></div>`);
+}
+function doCancel(id){
+  const o = orderById(id);
+  if(!o) return;
+  o.stage = "cancelled";
+  o.history.push({ stage:"cancelled", date:today() });
+  save(); closeModal(); render();
+  toast(id + " cancelled");
+}
+
+/* ---------- CSV ---------- */
+function downloadFile(name, text){
+  const blob = new Blob([text], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+}
+function exportOrders(){
+  const rows = filteredOrders();
+  const head = ["Order","Customer","Product","Qty","Rate","Value","Ordered","Due","Stage","Priority"];
+  const csv = [head.join(",")].concat(rows.map(o => {
+    const p = productById(o.productId);
+    return [o.id,o.customer,p?p.name:"",o.qty,o.rate,orderValue(o),o.ordered,o.due,stageBadge(o).label,o.priority]
+      .map(v => `"${String(v).replace(/"/g,'""')}"`).join(",");
+  })).join("\n");
+  downloadFile("kovai-orders-"+today()+".csv", csv);
+  toast("Orders exported as CSV");
+}
+
+/* ============================================================
+   Production board
+   ============================================================ */
+function boardCard(o, s){
+  const p = productById(o.productId) || { name:"Unknown product" };
+  const late = daysBetween(o.due, today());
+  const blocked = o.stage === "confirmed" && materialShort(o).length > 0;
+  const next = FLOW[stageIndex(o.stage)+1];
+  const label = o.stage === "confirmed"
+    ? (blocked ? "Material short" : "Issue material")
+    : o.stage === "ready" ? "Dispatch" : "→ " + stageMeta(next).short;
+  return `<div class="kcard" onclick="openOrder('${o.id}')">
+    <div class="no"><span>${o.id}</span>${late>0?`<span class="badge red">${late}d late</span>`:o.priority==="high"?`<span class="badge amber">High</span>`:""}</div>
+    <div class="cust">${esc(o.customer)}</div>
+    <div class="prod">${qty(o.qty)} × ${esc(p.name)}</div>
+    <div class="meta"><span class="due ${late>0?"late":""}">Due ${dateLabel(o.due)}</span><span>${money(orderValue(o))}</span></div>
+    <button class="adv" onclick="event.stopPropagation();advanceOrder('${o.id}')">${label}</button>
+  </div>`;
+}
+function renderBoard(){
+  const active = DB.orders.filter(isActive);
+  const cols = STAGES.map(s => {
+    const list = active.filter(o => o.stage === s.id).sort((a,b)=>String(a.due).localeCompare(String(b.due)));
+    const cards = list.length ? list.map(o => boardCard(o, s)).join("") : `<div class="empty" style="padding:20px 8px;font-size:11px">No orders</div>`;
+    return `<div class="kcol">
+      <div class="kcol-head"><span class="sw" style="background:${s.color}"></span><b>${esc(s.short)}</b><span class="count">${list.length}</span></div>
+      ${cards}
+    </div>`;
+  }).join("");
+  const value = active.reduce((t,o)=>t+orderValue(o),0);
+  return `<div class="panel" style="margin-bottom:16px">
+      <div class="toolbar">
+        <div><b style="font-size:13px">Work in progress</b> <span class="small muted">· ${active.length} orders · ${money(value)}</span></div>
+        <span class="grow"></span>
+        <span class="legend"><span><i class="s"></i>On track</span><span><i style="background:var(--red)"></i>Overdue</span></span>
+        <button class="btn sm" onclick="openOrder()">+ New order</button>
+      </div>
+    </div>
+    <div class="kanban">${cols}</div>`;
+}
+
+/* ============================================================
+   Materials
+   ============================================================ */
+function filteredMaterials(){
+  let rows = DB.materials.slice();
+  if(state.matFilter === "low") rows = rows.filter(m => n(m.stock) <= n(m.reorder));
+  else if(state.matFilter === "healthy") rows = rows.filter(m => n(m.stock) > n(m.reorder));
+  const q = state.matSearch.trim().toLowerCase();
+  if(q) rows = rows.filter(m => [m.id,m.name,m.supplier].join(" ").toLowerCase().includes(q));
+  return rows;
+}
+function materialRowsHtml(){
+  const rows = filteredMaterials();
+  if(!rows.length) return `<tr><td colspan="7"><div class="empty"><b>No materials match</b>Change the search or filter.</div></td></tr>`;
+  return rows.map(m => {
+    const low = n(m.stock) <= n(m.reorder);
+    const out = n(m.stock) <= 0;
+    const pct = Math.min(100, (n(m.stock)/Math.max(1,n(m.reorder)*2))*100);
+    return `<tr>
+      <td><div class="p-name">${esc(m.name)}</div><div class="p-code">${m.id} · ${esc(m.supplier)}</div></td>
+      <td><div style="min-width:110px"><div class="bar-track" style="height:5px"><div class="bar-fill" style="width:${pct}%;${low?"background:linear-gradient(90deg,#a84a4a,#ff8d8d)":""}"></div></div><div class="small muted" style="margin-top:4px">${qty(m.stock)} ${esc(m.unit)}</div></div></td>
+      <td class="num">${qty(m.reorder)} ${esc(m.unit)}</td>
+      <td class="num">${money(m.rate)}</td>
+      <td class="num">${money(n(m.stock)*n(m.rate))}</td>
+      <td>${out?`<span class="badge red">Out of stock</span>`:low?`<span class="badge amber">Below reorder</span>`:`<span class="badge green">Healthy</span>`}</td>
+      <td><button class="btn sm" onclick="openReceive('${m.id}')">Receive</button></td>
+    </tr>`;
+  }).join("");
+}
+function materialCountLabel(){
+  const rows = filteredMaterials();
+  return `${rows.length} item${rows.length===1?"":"s"} · ${money(rows.reduce((t,m)=>t+n(m.stock)*n(m.rate),0))}`;
+}
+function renderMaterials(){
+  const shorts = shortageMaterials();
+  const stockValue = DB.materials.reduce((t,m)=>t+n(m.stock)*n(m.rate),0);
+  const blocked = ordersBlocked();
+  const bomRows = PRODUCTS.map(p => {
+    const parts = (BOMS[p.id]||[]).map(b => {
+      const m = materialById(b.materialId);
+      return `<span class="badge muted" style="font-weight:600">${esc(m?m.name:b.materialId)} · ${qty(b.qty)} ${esc(m?m.unit:"")}</span>`;
+    }).join(" ");
+    return `<tr><td><div class="p-name">${esc(p.name)}</div><div class="p-code">${p.id} · ${esc(p.process)}</div></td><td class="num">${money(p.price)}</td><td>${parts}</td></tr>`;
+  }).join("");
+  return `
+  <div class="grid cols-3" style="margin-bottom:16px">
+    ${kpiCard("Material stock value", money(stockValue), `${DB.materials.length} items on hand`, ICONS.materials)}
+    ${kpiCard("Below reorder", shorts.length, shorts.length?shorts.map(m=>esc(m.name)).slice(0,2).join(", "):`<span class="badge green">All healthy</span>`, ICONS.materials, shorts.length?"var(--amber)":"var(--green)")}
+    ${kpiCard("Orders blocked", blocked.length, blocked.length?"Waiting on raw material":`<span class="badge green">No blocks</span>`, ICONS.orders, blocked.length?"var(--red)":"var(--green)")}
+  </div>
+  <div class="panel" style="margin-bottom:16px">
+    <div class="toolbar">
+      <input class="input" id="matSearch" placeholder="Search material or supplier…" value="${esc(state.matSearch)}" oninput="filterMaterials()" style="min-width:220px">
+      <select class="input" id="matFilter" onchange="filterMaterials()">
+        <option value="all"${state.matFilter==="all"?" selected":""}>All materials</option>
+        <option value="low"${state.matFilter==="low"?" selected":""}>Below reorder</option>
+        <option value="healthy"${state.matFilter==="healthy"?" selected":""}>Healthy</option>
+      </select>
+      <span class="grow"></span>
+      <span class="small muted" id="matCount">${materialCountLabel()}</span>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Material</th><th>Stock</th><th class="num">Reorder</th><th class="num">Rate</th><th class="num">Value</th><th>Status</th><th></th></tr></thead>
+      <tbody id="matRows">${materialRowsHtml()}</tbody>
+    </table></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><div><h2>Bill of materials</h2><p>Raw material needed per finished unit</p></div><div class="right"><span class="badge gold">${PRODUCTS.length} products</span></div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Finished product</th><th class="num">Selling price</th><th>Material per unit</th></tr></thead>
+      <tbody>${bomRows}</tbody>
+    </table></div>
+  </div>`;
+}
+function filterMaterials(){
+  state.matSearch = document.getElementById("matSearch").value;
+  state.matFilter = document.getElementById("matFilter").value;
+  document.getElementById("matRows").innerHTML = materialRowsHtml();
+  document.getElementById("matCount").textContent = materialCountLabel();
+}
+function openReceive(id, returnOrderId){
+  const m = materialById(id);
+  if(!m) return;
+  const suggested = Math.max(1, Math.round(n(m.reorder) * 1.5));
+  openModal(`
+    <div class="modal-head"><h3>Receive ${esc(m.name)}</h3><button class="icon-btn" onclick="closeModal()" aria-label="Close">✕</button></div>
+    <div class="modal-body">
+      <p class="hint">Current stock: <b style="color:var(--text)">${qty(m.stock)} ${esc(m.unit)}</b> · reorder at ${qty(m.reorder)} ${esc(m.unit)}</p>
+      <div class="form-grid" style="margin-top:14px">
+        <div class="field"><label>Quantity received</label><input class="input" id="rcQty" type="number" min="0.01" step="0.01" value="${suggested}"></div>
+        <div class="field"><label>Rate (₹ / ${esc(m.unit)})</label><input class="input" id="rcRate" type="number" min="1" step="0.01" value="${m.rate}"></div>
+        <div class="field span2"><label>Supplier / GRN note</label><input class="input" id="rcNote" value="${esc(m.supplier)}"></div>
+      </div>
+      <p class="hint" style="margin-top:12px">This adds stock immediately. It is a demo entry, not a purchase invoice.</p>
+      <p class="err" id="rcErr"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="${returnOrderId?`openOrder('${returnOrderId}')`:"closeModal()"}">Cancel</button>
+      <button class="btn primary" onclick="submitReceive('${m.id}','${returnOrderId||""}')">Add to stock</button>
+    </div>`);
+}
+function submitReceive(id, returnOrderId){
+  const m = materialById(id);
+  if(!m) return;
+  const q = n(document.getElementById("rcQty").value);
+  const rate = n(document.getElementById("rcRate").value);
+  const err = document.getElementById("rcErr");
+  if(q <= 0){ err.textContent = "Enter a quantity greater than zero."; err.classList.add("show"); return; }
+  m.stock = round2(n(m.stock) + q);
+  if(rate > 0) m.rate = rate;
+  save(); closeModal(); render();
+  toast(qty(q) + " " + m.unit + " of " + m.name + " received");
+  if(returnOrderId) openOrder(returnOrderId);
+}
+
+/* ============================================================
+   Dispatch
+   ============================================================ */
+function renderDispatch(){
+  const ready = DB.orders.filter(o => o.stage === "ready").sort((a,b)=>String(a.due).localeCompare(String(b.due)));
+  const week = weekWindow();
+  const dispatchedWeek = DB.orders.filter(o => o.stage === "dispatched" && o.dispatch && o.dispatch.date >= week.start && o.dispatch.date <= week.end);
+  const onTime = dispatchedWeek.filter(o => o.dispatch.date <= o.due).length;
+  const readyValue = ready.reduce((t,o)=>t+orderValue(o),0);
+  const weekValue = dispatchedWeek.reduce((t,o)=>t+orderValue(o),0);
+  const log = DB.orders.filter(o => o.stage === "dispatched" && o.dispatch)
+    .sort((a,b)=>String(b.dispatch.date).localeCompare(String(a.dispatch.date))).slice(0,12);
+
+  const readyRows = ready.length ? ready.map(o => {
+    const p = productById(o.productId) || { name:"Unknown" };
+    return `<tr>
+      <td><div class="p-name">${o.id}</div><div class="p-code">${esc(o.customer)}</div></td>
+      <td><div class="p-name">${esc(p.name)}</div><div class="p-code">${p.id}</div></td>
+      <td class="num">${qty(o.qty)}</td>
+      <td class="num">${money(orderValue(o))}</td>
+      <td>${dateLabel(o.due)} ${o.due < today() ? `<span class="badge red">${daysBetween(o.due,today())}d late</span>` : ""}</td>
+      <td><button class="btn sm primary" onclick="openDispatch('${o.id}')">Dispatch</button></td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="6"><div class="empty"><b>No orders ready</b>Move an order to <b>Ready to dispatch</b> on the production board first.</div></td></tr>`;
+
+  const logRows = log.length ? log.map(o => {
+    const p = productById(o.productId) || { name:"Unknown" };
+    const on = o.dispatch.date <= o.due;
+    return `<tr>
+      <td><div class="p-name">${o.id}</div><div class="p-code">${esc(o.customer)}</div></td>
+      <td>${dateLabel(o.dispatch.date)}</td>
+      <td>${esc(p.name)}</td>
+      <td class="num">${qty(o.dispatch.qty)}</td>
+      <td>${esc(o.dispatch.vehicle||"—")}<div class="p-code">${esc(o.dispatch.docket||"")}</div></td>
+      <td class="num">${money(orderValue(o))}</td>
+      <td>${on?`<span class="badge green">On time</span>`:`<span class="badge red">Late</span>`}</td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="7"><div class="empty"><b>No dispatches yet</b>Dispatch a ready order to build the register.</div></td></tr>`;
+
+  return `
+  <div class="grid cols-3" style="margin-bottom:16px">
+    ${kpiCard("Ready to dispatch", ready.length, `${money(readyValue)} waiting`, ICONS.dispatch)}
+    ${kpiCard("Dispatched this week", money(weekValue), `${dispatchedWeek.length} orders · ${qty(dispatchedWeek.reduce((t,o)=>t+n(o.qty),0))} units`, ICONS.orders)}
+    ${kpiCard("On-time delivery", dispatchedWeek.length ? Math.round(onTime/dispatchedWeek.length*100)+"%" : "—", dispatchedWeek.length ? `${onTime} of ${dispatchedWeek.length} this week` : "No dispatches this week", ICONS.reports, dispatchedWeek.length && onTime===dispatchedWeek.length ? "var(--green)" : "var(--amber)")}
+  </div>
+  <div class="panel" style="margin-bottom:16px">
+    <div class="panel-head"><div><h2>Ready to dispatch</h2><p>Packed orders waiting for vehicle and docket</p></div><div class="right"><button class="btn sm" onclick="go('board')">Production board</button></div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Order</th><th>Product</th><th class="num">Qty</th><th class="num">Value</th><th>Due</th><th></th></tr></thead>
+      <tbody>${readyRows}</tbody>
+    </table></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><div><h2>Dispatch register</h2><p>Latest 12 dispatches</p></div><div class="right"><span class="badge muted">${DB.orders.filter(o=>o.stage==="dispatched").length} total</span></div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Order</th><th>Dispatched</th><th>Product</th><th class="num">Qty</th><th>Vehicle / docket</th><th class="num">Value</th><th>Delivery</th></tr></thead>
+      <tbody>${logRows}</tbody>
+    </table></div>
+  </div>`;
+}
+function openDispatch(id){
+  const o = orderById(id);
+  if(!o || o.stage !== "ready") return;
+  const p = productById(o.productId) || { name:"Unknown" };
+  openModal(`
+    <div class="modal-head"><h3>Dispatch ${o.id}</h3><button class="icon-btn" onclick="closeModal()" aria-label="Close">✕</button></div>
+    <div class="modal-body">
+      <div class="list-row" style="padding-top:0">
+        <div class="list-dot" style="background:var(--green-soft);color:var(--green)">✓</div>
+        <div class="list-main"><b>${esc(o.customer)}</b><span>${qty(o.qty)} × ${esc(p.name)} · ${money(orderValue(o))}</span></div>
+      </div>
+      <div class="form-grid" style="margin-top:14px">
+        <div class="field"><label>Dispatch date</label><input class="input" id="dpDate" type="date" value="${today()}"></div>
+        <div class="field"><label>Vehicle number</label><input class="input" id="dpVehicle" placeholder="TN 38 AB 1234"></div>
+        <div class="field"><label>LR / docket no.</label><input class="input" id="dpDocket" placeholder="LR-9031"></div>
+        <div class="field"><label>Quantity</label><input class="input" value="${qty(o.qty)} pcs" disabled></div>
+      </div>
+      <p class="hint" style="margin-top:12px">Dispatching closes the order and adds it to this week's report.</p>
+      <p class="err" id="dpErr"></p>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="openOrder('${o.id}')">Back</button><button class="btn primary" onclick="submitDispatch('${o.id}')">Confirm dispatch</button></div>`);
+}
+function submitDispatch(id){
+  const o = orderById(id);
+  if(!o || o.stage !== "ready") return;
+  const date = document.getElementById("dpDate").value;
+  const vehicle = document.getElementById("dpVehicle").value.trim();
+  const docket = document.getElementById("dpDocket").value.trim();
+  const err = document.getElementById("dpErr");
+  const fail = msg => { err.textContent = msg; err.classList.add("show"); };
+  if(!date) return fail("Choose the dispatch date.");
+  if(!vehicle) return fail("Enter the vehicle number.");
+  if(!docket) return fail("Enter the LR / docket number.");
+  o.stage = "dispatched";
+  o.dispatch = { date, vehicle, docket, qty:o.qty };
+  o.history.push({ stage:"dispatched", date });
+  save(); closeModal(); render();
+  toast(o.id + " dispatched · " + money(orderValue(o)));
+}
+
+/* ============================================================
+   Weekly report
+   ============================================================ */
+function ageBucket(o){
+  const d = daysBetween(today(), o.due);
+  if(d < 0) return "overdue";
+  if(d <= 3) return "soon";
+  if(d <= 7) return "week";
+  return "later";
+}
+function renderReports(){
+  const week = weekWindow();
+  const dispatched = DB.orders.filter(o => o.stage === "dispatched" && o.dispatch && o.dispatch.date >= week.start && o.dispatch.date <= week.end);
+  const value = dispatched.reduce((t,o)=>t+orderValue(o),0);
+  const units = dispatched.reduce((t,o)=>t+n(o.qty),0);
+  const onTime = dispatched.filter(o => o.dispatch.date <= o.due).length;
+  const onPct = dispatched.length ? Math.round(onTime/dispatched.length*100) : 0;
+  const consumed = DB.consumption.filter(c => c.date >= week.start && c.date <= week.end);
+  const matValue = consumed.reduce((t,c) => { const m = materialById(c.materialId); return t + n(c.qty)*(m?n(m.rate):0); }, 0);
+  const active = DB.orders.filter(isActive);
+  const overdue = active.filter(isOverdue);
+
+  const daily = week.days.map(d => {
+    const rows = dispatched.filter(o => o.dispatch.date === d);
+    return { d, value:rows.reduce((t,o)=>t+orderValue(o),0), count:rows.length };
+  });
+  const dmax = Math.max(1, ...daily.map(x=>x.value));
+  const dayChart = daily.map(x => {
+    const dow = new Date(x.d+"T00:00:00").getDay();
+    return `<div class="chart-col" title="${dateLong(x.d)} · ${x.count} orders · ${money(x.value)}">
+      <div class="chart-bars"><div class="chart-bar" style="height:${Math.max(2,(x.value/dmax)*100)}%"></div></div>
+      <div class="chart-label">${DAYS[dow]}</div>
+    </div>`;
+  }).join("");
+
+  const mix = {};
+  dispatched.forEach(o => { mix[o.productId] = (mix[o.productId]||0) + n(o.qty); });
+  const mixRows = Object.entries(mix).sort((a,b)=>b[1]-a[1]);
+  const mixMax = Math.max(1, ...mixRows.map(x=>x[1]));
+  const mixHtml = mixRows.length ? mixRows.map(([pid,q]) => {
+    const p = productById(pid);
+    return `<div class="bar-row"><div class="n">${esc(p?p.name:pid)}</div><div class="v">${qty(q)} pcs</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(3,(q/mixMax)*100)}%"></div></div></div>`;
+  }).join("") : `<div class="empty"><b>No output this week</b>Dispatch an order to populate the mix.</div>`;
+
+  const regRows = dispatched.length ? dispatched.slice().sort((a,b)=>String(a.dispatch.date).localeCompare(String(b.dispatch.date))).map(o => {
+    const p = productById(o.productId) || { name:"Unknown" };
+    const on = o.dispatch.date <= o.due;
+    return `<tr>
+      <td><div class="p-name">${o.id}</div><div class="p-code">${esc(o.customer)}</div></td>
+      <td>${dateLabel(o.dispatch.date)}</td>
+      <td>${esc(p.name)}</td>
+      <td class="num">${qty(o.qty)}</td>
+      <td class="num">${money(orderValue(o))}</td>
+      <td>${on?`<span class="badge green">On time</span>`:`<span class="badge red">Late</span>`}</td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="6"><div class="empty"><b>No dispatches in this period</b>Dispatch a ready order from the Dispatch view.</div></td></tr>`;
+
+  const matMap = {};
+  consumed.forEach(c => {
+    if(!matMap[c.materialId]) matMap[c.materialId] = { qty:0, value:0 };
+    const m = materialById(c.materialId);
+    matMap[c.materialId].qty += n(c.qty);
+    matMap[c.materialId].value += n(c.qty)*(m?n(m.rate):0);
+  });
+  const matRows = Object.keys(matMap).length ? Object.entries(matMap).sort((a,b)=>b[1].value-a[1].value).map(([id,v]) => {
+    const m = materialById(id);
+    return `<tr><td><div class="p-name">${esc(m?m.name:id)}</div><div class="p-code">${id}</div></td>
+      <td class="num">${qty(v.qty)} ${esc(m?m.unit:"")}</td><td class="num">${money(v.value)}</td></tr>`;
+  }).join("") : `<tr><td colspan="3"><div class="empty"><b>No material issued</b>Issue material on a confirmed order.</div></td></tr>`;
+
+  const buckets = [
+    { key:"overdue", label:"Overdue", tone:"red" },
+    { key:"soon",    label:"Due in 0–3 days", tone:"amber" },
+    { key:"week",    label:"Due in 4–7 days", tone:"blue" },
+    { key:"later",   label:"Due later", tone:"muted" }
+  ].map(b => {
+    const rows = active.filter(o => ageBucket(o) === b.key);
+    return `<tr><td><span class="badge ${b.tone}">${b.label}</span></td><td class="num">${rows.length}</td><td class="num">${money(rows.reduce((t,o)=>t+orderValue(o),0))}</td></tr>`;
+  }).join("");
+
+  return `
+  <div class="print-head">
+    <div><h1>Weekly production report</h1><p>${esc(BRAND.name)} · ${dateLong(week.start)} – ${dateLong(week.end)}</p></div>
+    <div style="text-align:right"><p>Generated ${dateLong(today())}</p><p>Fictional demo data</p></div>
+  </div>
+  <div class="panel no-print" style="margin-bottom:16px">
+    <div class="panel-head">
+      <div><h2>Week of ${dateLabel(week.start)} – ${dateLabel(week.end)}</h2><p>Rolling 7 days · generated ${dateLong(today())}</p></div>
+      <div class="right"><span class="badge gold">${dispatched.length} dispatches</span><button class="btn sm" onclick="window.print()">Print / PDF</button></div>
+    </div>
+  </div>
+  <div class="grid cols-4" style="margin-bottom:16px">
+    ${kpiCard("Dispatched value", money(value), `${dispatched.length} orders · ${qty(units)} units`, ICONS.dispatch)}
+    ${kpiCard("On-time delivery", dispatched.length?onPct+"%":"—", dispatched.length?`${onTime} of ${dispatched.length} on time`:"No dispatches this week", ICONS.reports, dispatched.length && onPct===100?"var(--green)":"var(--amber)")}
+    ${kpiCard("Material consumed", money(matValue), `${consumed.length} issue entries`, ICONS.materials)}
+    ${kpiCard("Overdue exposure", money(overdue.reduce((t,o)=>t+orderValue(o),0)), `${overdue.length} order${overdue.length===1?"":"s"} past due`, ICONS.board, overdue.length?"var(--red)":"var(--green)")}
+  </div>
+  <div class="split" style="margin-bottom:16px">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Daily dispatch value</h2><p>${dateLabel(week.start)} – ${dateLabel(week.end)}</p></div><div class="right"><span class="badge muted">${money(value)} total</span></div></div>
+      <div class="panel-body"><div class="chart">${dayChart}</div><div class="legend"><span><i class="s"></i>Dispatch value</span><span class="muted">Bars show days with dispatches</span></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Product mix</h2><p>Units dispatched this week</p></div></div>
+      <div class="panel-body">${mixHtml}</div>
+    </div>
+  </div>
+  <div class="grid cols-2" style="margin-bottom:16px">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Dispatch register</h2><p>Orders closed this week</p></div></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Order</th><th>Date</th><th>Product</th><th class="num">Qty</th><th class="num">Value</th><th>Delivery</th></tr></thead>
+        <tbody>${regRows}</tbody>
+      </table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Material consumption</h2><p>Issued to production this week</p></div></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Material</th><th class="num">Quantity</th><th class="num">Value</th></tr></thead>
+        <tbody>${matRows}</tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><div><h2>Open order ageing</h2><p>${active.length} open orders · ${money(active.reduce((t,o)=>t+orderValue(o),0))} in progress</p></div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Bucket</th><th class="num">Orders</th><th class="num">Value</th></tr></thead>
+      <tbody>${buckets}</tbody>
+    </table></div>
+  </div>`;
+}
+
+/* ============================================================
+   Demo guide, reset and init
+   ============================================================ */
+function demoGuide(){
+  const step = (num, title, body) => `<div class="list-row">
+    <div class="list-dot" style="background:var(--gold-soft);color:var(--gold)">${num}</div>
+    <div class="list-main"><b>${title}</b><span>${body}</span></div>
+  </div>`;
+  openModal(`
+    <div class="modal-head"><h3>5-step demo script</h3><button class="icon-btn" onclick="closeModal()" aria-label="Close">✕</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:6px">Use this order on a discovery call. Every number is fictional.</p>
+      ${step(1,"Start on Overview","Point out the two overdue orders and the copper bush shortage. This is the daily owner view.")}
+      ${step(2,"Open ORD-1048","Show the material requirement: 30 copper bushes needed, 18 in stock. The order cannot start.")}
+      ${step(3,"Receive material","Go to Materials → Copper Bush → Receive. Add 60 pcs, then issue material on ORD-1048.")}
+      ${step(4,"Move the board","On the Production board, advance ORD-1049 through Assembly → QC → Ready.")}
+      ${step(5,"Dispatch and report","Dispatch ORD-1054 with a vehicle and docket, then open Weekly report to show the updated output and on-time %.")}
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Close</button><button class="btn ghost" onclick="closeModal();resetDemo()">Reset data</button><button class="btn primary" onclick="closeModal();go('orders')">Open orders</button></div>`);
+}
+function resetDemo(){
+  openModal(`
+    <div class="modal-head"><h3>Reset demo data?</h3><button class="icon-btn" onclick="closeModal()" aria-label="Close">✕</button></div>
+    <div class="modal-body"><p class="hint">This restores the original fictional workspace: 22 orders, 7 raw materials and the seeded shortage. Your changes will be lost.</p></div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Keep my changes</button><button class="btn danger" onclick="doReset()">Reset demo data</button></div>`);
+}
+function doReset(){
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  DB = seedDb();
+  save();
+  closeModal();
+  state.view = "overview";
+  if(location.hash !== "#overview") history.replaceState(null,"","#overview");
+  render();
+  toast("Demo data reset to the original workspace");
+}
+function init(){
+  document.querySelectorAll(".nav-btn").forEach(b => {
+    const ico = b.querySelector(".ico");
+    if(ico) ico.innerHTML = ICONS[b.dataset.view] || "";
+  });
+  const hash = (location.hash || "").replace("#","");
+  if(VIEW_META[hash]) state.view = hash;
+  render();
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
+  window.addEventListener("hashchange", () => {
+    const v = (location.hash || "").replace("#","");
+    if(VIEW_META[v]){ state.view = v; render(); }
+  });
+}
+init();
+</script>
+</body>
+</html>
