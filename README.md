@@ -4,6 +4,11 @@ Marketing site and working demos for Zeroth Digital Systems — practical dashbo
 
 Static HTML, CSS and JavaScript. No build step, no dependencies, no tracking.
 
+## Live
+
+- https://zeroth.pages.dev — Cloudflare Pages (primary)
+- https://jacobzeroth.github.io/zeroth-digital-systems/ — GitHub Pages (mirror)
+
 ## Structure
 
 ```
